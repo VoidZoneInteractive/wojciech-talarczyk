@@ -27,13 +27,18 @@ class BazaDanych
 
     public function dodajUzytkownikaDoBazy($login, $haslo)
     {
-        $zapytanie = sprintf('INSERT INTO uzytkownik (login, haslo) VALUES (%s, %s)', $login, $haslo);
+        $trescZapytania = 'INSERT INTO uzytkownik (login, haslo) VALUES (?, ?)';
+        $parametry = ['ss', &$login, &$haslo];
 
-        $this->wykonajZapytanieDoBazy($zapytanie);
+        $this->wykonajZapytanieDoBazy($trescZapytania, $parametry);
     }
 
-    private function wykonajZapytanieDoBazy($zapytanie)
+    private function wykonajZapytanieDoBazy($trescZapytania, $parametry)
     {
+        $zapytanie = self::$polaczenie->prepare($trescZapytania);
 
+        call_user_func_array([$zapytanie, 'bind_param'], $parametry);
+
+        $zapytanie->execute();
     }
 }

@@ -20,7 +20,8 @@ class Kontroler
                 break;
             case 'rejestracja':
                 return $this->rejestracja();
-                break;
+            case 'rejestracjaPodziekowanie':
+                return $this->rejestracjaPodziekowanie();
             case 'stronaGlowna':
                 return $this->stronaGlowna();
         }
@@ -39,13 +40,31 @@ class Kontroler
     {
         // Sprawdzamy czy ktos wyslal dane formularza
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            try {
+                $bazaDanych = new BazaDanych();
+                $bazaDanych->dodajUzytkownikaDoBazy($_POST['login'], $_POST['haslo']);
+            } catch (\Exception $e) {
+                throw $e;
+            }
 
             // Przekierowujemy uzytkownika na strone z podziekowaniami za rejestracje
-            header('Location: /?strona=rejestracjaPodziekowania');
+            header('Location: /?strona=rejestracjaPodziekowanie');
             exit();
         } else {
             $szablon = $this->szablon->zwrocSzablon($this->nazwa_strony);
         }
+
+        return $szablon;
+    }
+
+    public function logowanie()
+    {
+
+    }
+
+    public function rejestracjaPodziekowanie()
+    {
+        $szablon = $this->szablon->zwrocSzablon($this->nazwa_strony);
 
         return $szablon;
     }
