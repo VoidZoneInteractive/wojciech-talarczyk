@@ -1,0 +1,143 @@
+<!doctype html>
+
+<html lang="pl">
+<head>
+    <meta charset="utf-8">
+
+    <title>Siłownia - Panel użytkownika</title>
+    <meta name="author" content="Wojciech Talarczyk">
+
+    <style type="text/css">
+        .kalendarz {
+            width: 90%;
+            margin: 20px 5%;
+            border: 1px dashed #999;
+
+            display: flex;
+            flex-direction: row;
+            flex-flow: row wrap;
+        }
+
+        .kalendarz-naglowek {
+            border: 1px dotted #990000;
+            width: 18%;
+            box-sizing: border-box;
+            padding: 5px;
+            flex: auto;
+        }
+
+        .kalendarz-naglowek-trener {
+            border: 1px dotted #990000;
+            width: 10%;
+            box-sizing: border-box;
+            padding: 5px;
+            flex: auto;
+        }
+
+        .kalendarz-zapis {
+            border: 1px dotted #009900;
+            width: 18%;
+            box-sizing: border-box;
+            padding: 5px;
+            flex: auto;
+        }
+
+        .kalendarz-trener {
+            border: 1px dotted #009900;
+            width: 10%;
+            box-sizing: border-box;
+            padding: 5px;
+            flex: auto;
+        }
+    </style>
+
+</head>
+
+<body>
+
+<div id="wiadomosc" style="%{styl_wiadomosci}">%{wiadomosc}</div>
+
+<div><a href="/?strona=wylogowywanie">Wyloguj sie</a></div>
+
+<form name="kalendarz" method="post" action="">
+    <div class="kalendarz">
+        <div class="kalendarz-naglowek-trener">
+            Trener
+        </div>
+        <div class="kalendarz-naglowek">
+            Poniedziałek
+        </div>
+        <div class="kalendarz-naglowek">
+            Wtorek
+        </div>
+        <div class="kalendarz-naglowek">
+            Środa
+        </div>
+        <div class="kalendarz-naglowek">
+            Czwartek
+        </div>
+        <div class="kalendarz-naglowek">
+            Piątek
+        </div>
+
+        <div class="kalendarz-trener">
+            Trener 1
+        </div>
+        <div class="kalendarz-zapis">
+            <button type="submit" name="kalendarz[1][poniedzialek]" value="%{wartosc-trener_1-poniedzialek}">
+                %{przycisk-trener_1-poniedzialek}
+            </button>
+        </div>
+        <div class="kalendarz-zapis">
+            <button type="submit" name="kalendarz[1][wtorek]" value="%{wartosc-trener_1-wtorek}">
+                %{przycisk-trener_1-wtorek}
+            </button>
+        </div>
+        <div class="kalendarz-zapis">
+            <button type="submit" name="kalendarz[1][sroda]" value="%{wartosc-trener_1-sroda}">
+                %{przycisk-trener_1-sroda}
+            </button>
+        </div>
+        <div class="kalendarz-zapis">
+            <button type="submit" name="kalendarz[1][czwartek]" value="%{wartosc-trener_1-czwartek}">
+                %{przycisk-trener_1-czwartek}
+            </button>
+        </div>
+        <div class="kalendarz-zapis">
+            <button type="submit" name="kalendarz[1][piatek]" value="%{wartosc-trener_1-piatek}">
+                %{przycisk-trener_1-piatek}
+            </button>
+        </div>
+
+        <div class="kalendarz-trener">
+            Trener 2
+        </div>
+        <div class="kalendarz-zapis">
+            <button type="submit" name="kalendarz[2][poniedzialek]" value="%{wartosc-trener_2-poniedzialek}">
+                %{przycisk-trener_2-poniedzialek}
+            </button>
+        </div>
+        <div class="kalendarz-zapis">
+            <button type="submit" name="kalendarz[2][wtorek]" value="%{wartosc-trener_2-wtorek}">
+                %{przycisk-trener_2-wtorek}
+            </button>
+        </div>
+        <div class="kalendarz-zapis">
+            <button type="submit" name="kalendarz[2][sroda]" value="%{wartosc-trener_2-sroda}">
+                %{przycisk-trener_2-sroda}
+            </button>
+        </div>
+        <div class="kalendarz-zapis">
+            <button type="submit" name="kalendarz[2][czwartek]" value="%{wartosc-trener_2-czwartek}">
+                %{przycisk-trener_2-czwartek}
+            </button>
+        </div>
+        <div class="kalendarz-zapis">
+            <button type="submit" name="kalendarz[2][piatek]" value="%{wartosc-trener_2-piatek}">
+                %{przycisk-trener_2-piatek}
+            </button>
+        </div>
+    </div>
+</form>
+</body>
+</html>
