@@ -34,6 +34,16 @@ class Uzytkownik
         return $uzytkownik && $uzytkownik['id_trenera'];
     }
 
+    public function uzytkownikJestAdministratorem() {
+        $uzytkownik = $this->pobierzUzytkownikaZSesji();
+
+        return $uzytkownik && !empty($uzytkownik['administrator']);
+    }
+
+    public function usunUzytkownika($id) {
+        $this->bazaDanych->usunUzytkownika($id);
+    }
+
     private function zapiszUzytkownikaWSesji(array $uzytkownik)
     {
         $_SESSION[self::NAZWA_SESJI_UZYTKOWNIKA] = $uzytkownik;
@@ -51,7 +61,9 @@ class Uzytkownik
         if (!empty($uzytkownik) && $this->porownajHasloIHasz($haslo, $uzytkownik['haslo'])) {
             $this->zapiszUzytkownikaWSesji($uzytkownik);
             // Przekieruj na panel administracyjny
-            if (!empty($uzytkownik['id_trenera'])) {
+            if (!empty($uzytkownik['administrator'])) {
+                header('Location: /?strona=panelAdministratora');
+            } elseif (!empty($uzytkownik['id_trenera'])) {
                 header('Location: /?strona=panelTrenera');
             } else {
                 header('Location: /?strona=panelUzytkownika');
@@ -65,6 +77,51 @@ class Uzytkownik
         session_destroy();
         header('Location: /?strona=logowanie');
         exit();
+    }
+
+    public function sprawdzPoprawnoscDanychRejestracji(string $imie = null, string $nazwisko, string $login = null, string $haslo)
+    {
+        $walidacja = [];
+
+        if ($walidujImie = $this->sprawdzImie($imie)) {
+            $walidacja[] = $walidujImie;
+        }
+
+        if ($walidujNazwisko = $this->sprawdzNazwisko($nazwisko)) {
+            $walidacja[] = $walidujNazwisko;
+        }
+
+        if ($walidujLogin = $this->sprawdzLogin($login)) {
+            $walidacja[] = $walidujLogin;
+        }
+
+        if ($walidujHaslo = $this->sprawdzHaslo($haslo)) {
+            $walidacja[] = $walidujHaslo;
+        }
+
+        return $walidacja;
+    }
+
+    private function sprawdzLogin(string $login = null)
+    {
+        return (!empty($login) && filter_var($login, FILTER_VALIDATE_EMAIL)) ? null : 'Niepoprawny email';
+    }
+
+    private function sprawdzImie(string $imie = null) {
+        return !empty($imie) ? null : 'Niepoprawne imię';
+    }
+
+    private function sprawdzNazwisko(string $nazwisko = null) {
+        return !empty($nazwisko) ? null : 'Niepoprawne imię';
+    }
+
+    private function sprawdzHaslo(string $haslo = null) {
+        return (!empty($haslo) && strlen($haslo) > 4) ? null : 'Niepoprawne hasło (musi mieć przynajmniej 5 znaków)';
+    }
+
+    public function pobierzListeUzytkownikow()
+    {
+        return $this->bazaDanych->pobierzListeUzytkownikow();
     }
 
     public function zarejestrujUzytkownika(string $imie, string $nazwisko, string $login, string $haslo)
