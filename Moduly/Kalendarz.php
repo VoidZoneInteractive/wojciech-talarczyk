@@ -17,6 +17,7 @@ class Kalendarz
 
     private $bazaDanych;
     private $uzytkownik;
+    private $szablon;
 
     /**
      * Kalendarz constructor.
@@ -35,6 +36,7 @@ class Kalendarz
 
         $this->bazaDanych = new BazaDanych();
         $this->uzytkownik = new Uzytkownik();
+        $this->szablon = new Szablon();
     }
 
     /**
@@ -84,6 +86,27 @@ class Kalendarz
         return $parametry;
     }
 
+    public function przygotujParametrySzablonuAdministratora()
+    {
+        $daneKalendarzy = $this->bazaDanych->pobierzKalendarzeTrenerow();
+        $daneKalendarzy = $this->przetworzKalendarze($daneKalendarzy);
+
+        $wpisy = '';
+
+        foreach ($daneKalendarzy as $trener => $daneKalendarza) {
+            $parametry = ['%{trener}' => $trener];
+
+            foreach (self::DNI as $dzien) {
+                $klucz = sprintf('%%{uzytkownicy-%s}', $dzien);
+                $parametry[$klucz] = !empty($daneKalendarza[$dzien]) ? $this->przygotujListeUzytkownikowKalendarzaAdministratora($daneKalendarza[$dzien]) : 'Brak zapisanych.';
+            }
+
+            $wpisy .= $this->szablon->zwrocSzablon('panelAdministratora-wpis', $parametry);
+        }
+
+        return $wpisy;
+    }
+
     /**
      * @param array $uzytkownicy
      * @return string
@@ -93,6 +116,26 @@ class Kalendarz
     public function przygotujListeUzytkownikow(array $uzytkownicy)
     {
         return '<ul><li>' . implode('</li><li>', $uzytkownicy) . '</li></ul>';
+    }
+
+    public function przygotujListeUzytkownikowKalendarzaAdministratora(array $uzytkownicy)
+    {
+        foreach ($uzytkownicy as &$uzytkownik) {
+            $uzytkownik = $uzytkownik['dane'] . ' <a href=" /?strona=usunWpisKalendarza&id='.$uzytkownik['id_kalendarza'].'" onclick="if(!confirm(\'Czy napewno usunąć wpis kalendarza użytkownika?\')) { return false; }">usuń</a>';
+        }
+        return '<ul><li>' . implode('</li><li>', $uzytkownicy) . '</li></ul>';
+    }
+
+    public function przygotujListeUzytkownikowAdministratora(array $uzytkownicy)
+    {
+        foreach ($uzytkownicy as &$uzytkownik) {
+            $uzytkownik = $uzytkownik['dane'] . ' <a href=" /?strona=usunUzytkownika&id='.$uzytkownik['id'].'" onclick="if(!confirm(\'Czy napewno usunąć użytkownika: '.$uzytkownik['dane'].'?\')) { return false; }">usuń</a>';
+        }
+        return '<ul><li>' . implode('</li><li>', $uzytkownicy) . '</li></ul>';
+    }
+
+    public function usunWpisKalendarza($id) {
+        $this->bazaDanych->usunWpisKalendarza($id);
     }
 
     /**
@@ -138,6 +181,34 @@ class Kalendarz
         }
 
         return $rezultat;
+    }
+
+    public function przetworzKalendarze(array $daneKalendarzy)
+    {
+        $rezultat = [];
+
+        foreach ($daneKalendarzy as $wpisKalendarza) {
+            $trener = sprintf('%s %s', $wpisKalendarza['imie'], $wpisKalendarza['nazwisko']);
+            if (empty($rezultat[$trener])) {
+                $rezultat[$trener] = [];
+            }
+
+            if (empty($rezultat[$trener][$wpisKalendarza['dzien']])) {
+                $rezultat[$trener][$wpisKalendarza['dzien']] = [];
+            }
+
+            if (!empty($wpisKalendarza['zapisany'])) {
+                $uzytkownik = $this->bazaDanych->pobierzNazweUzytkownikaPoId($wpisKalendarza['uzytkownik']);
+                $rezultat[$trener][$wpisKalendarza['dzien']][] = ['dane' => sprintf('%s %s', $uzytkownik['imie'], $uzytkownik['nazwisko']), 'id_kalendarza' => $wpisKalendarza['id']];
+            }
+        }
+
+        return $rezultat;
+    }
+
+    public function usunWpisyUzytkownika($id)
+    {
+        $this->bazaDanych->usunWpisyUzytkownika($id);
     }
 
     /**

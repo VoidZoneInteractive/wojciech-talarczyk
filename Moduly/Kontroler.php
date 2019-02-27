@@ -57,6 +57,12 @@ class Kontroler
                 return $this->panelUzytkownika();
             case 'panelTrenera':
                 return $this->panelTrenera();
+            case 'panelAdministratora':
+                return $this->panelAdministratora();
+            case 'usunWpisKalendarza':
+                $this->usunWpisKalendarza();
+            case 'usunUzytkownika':
+                $this->usunUzytkownika();
         }
 
         throw new \Exception(sprintf('Nie znaleziono strony %s', $this->nazwa_strony));
@@ -95,6 +101,25 @@ class Kontroler
             $nazwisko = $_POST['nazwisko'];
             $login = $_POST['login'];
             $haslo = $_POST['haslo'];
+
+            // Ta metoda sprawdza poprawnosc danych do rejestracji
+            $walidacja = $this->uzytkownik->sprawdzPoprawnoscDanychRejestracji($imie, $nazwisko, $login, $haslo);
+
+            // Sprawdz poprawnosc danych - jeżeli funkcja zwrocila cos innego niz null, wyswietl sformatowana wiadomosc
+            if ($walidacja) {
+                $szablon = $this->szablon->zwrocSzablon(
+                    $this->nazwa_strony,
+                    [
+                        '%{imie}' => 'value="' . $imie . '"',
+                        '%{nazwisko}' => 'value="' . $nazwisko . '"',
+                        '%{login}' => 'value="' . $login . '"',
+                        '%{wiadomosc}' => 'Wystapił błąd przy rejestracji:<br /><ul><li>' . implode('</li><li>', $walidacja) . '</li></ul>',
+                        '%{styl_wiadomosci}' => 'display: block;',
+                    ]
+                );
+
+                return $szablon;
+            }
 
             $this->uzytkownik->zarejestrujUzytkownika($imie, $nazwisko, $login, $haslo);
 
@@ -233,7 +258,74 @@ class Kontroler
         $szablon = $this->szablon->zwrocSzablon($this->nazwa_strony, $parametry);
 
         return $szablon;
+    }
 
+    public function panelAdministratora()
+    {
+        if (!$this->uzytkownik->uzytkownikJestAdministratorem()) {
+            // Przekierowujemy na stronę logowania, bo nie znaleziono zalogowanego użytkownika albo uzytkownik nie jest trenerem
+            header('Location: /?strona=logowanie');
+            exit();
+        }
+
+        $kalendarz = new Kalendarz();
+
+        $uzytkownicy = $this->uzytkownik->pobierzListeUzytkownikow();
+
+        foreach ($uzytkownicy as &$uzytkownik) {
+            $uzytkownik = ['dane' => sprintf('%s %s', $uzytkownik['imie'], $uzytkownik['nazwisko']), 'id' => $uzytkownik['id']];
+        }
+
+        $parametry = [
+            '%{wpisy}' => $kalendarz->przygotujParametrySzablonuAdministratora(),
+            '%{lista-uzytkownikow}' => $kalendarz->przygotujListeUzytkownikowAdministratora($uzytkownicy),
+        ];
+
+        $szablon = $this->szablon->zwrocSzablon($this->nazwa_strony, $parametry);
+
+        return $szablon;
+    }
+
+    public function usunWpisKalendarza()
+    {
+        if (!$this->uzytkownik->uzytkownikJestAdministratorem()) {
+            // Przekierowujemy na stronę logowania, bo nie znaleziono zalogowanego użytkownika albo uzytkownik nie jest trenerem
+            header('Location: /?strona=logowanie');
+            exit();
+        }
+
+        $id = $_GET['id'];
+
+        $kalendarz = new Kalendarz();
+
+        $kalendarz->usunWpisKalendarza($id);
+
+        // Przekierowujemy na stronę panelu administratora
+        header('Location: /?strona=panelAdministratora');
+        exit();
+    }
+
+    public function usunUzytkownika()
+    {
+        if (!$this->uzytkownik->uzytkownikJestAdministratorem()) {
+            // Przekierowujemy na stronę logowania, bo nie znaleziono zalogowanego użytkownika albo uzytkownik nie jest trenerem
+            header('Location: /?strona=logowanie');
+            exit();
+        }
+
+        $id = $_GET['id'];
+
+        $kalendarz = new Kalendarz();
+
+        // Najpierw usuwamy wpisy uzytkownika z kalendarza
+        $kalendarz->usunWpisyUzytkownika($id);
+
+        // Potem usuwamy samego uzytkownika
+        $this->uzytkownik->usunUzytkownika($id);
+
+        // Przekierowujemy na stronę panelu administratora
+        header('Location: /?strona=panelAdministratora');
+        exit();
     }
 
     /**
@@ -241,6 +333,11 @@ class Kontroler
      */
     private function przekierujZalogowanegoUzytkownika()
     {
+        if ($this->uzytkownik->uzytkownikJestAdministratorem()) {
+            // Przekierowujemy na stronę panelu administratora, bo znaleziono zalogowanego administratora
+            header('Location: /?strona=panelAdministratora');
+            exit();
+        }
         if ($this->uzytkownik->uzytkownikJestTrenerem()) {
             // Przekierowujemy na stronę panelu trenera, bo znaleziono zalogowanego trenera
             header('Location: /?strona=panelTrenera');

@@ -64,7 +64,7 @@ class BazaDanych
      */
     public function pobierzUzytkownika(string $login)
     {
-        $trescZapytania = 'SELECT id, imie, nazwisko, login, haslo, id_trenera FROM uzytkownik WHERE login = ?';
+        $trescZapytania = 'SELECT id, imie, nazwisko, login, haslo, id_trenera, administrator FROM uzytkownik WHERE login = ?';
 
         $parametry = ['s', &$login];
 
@@ -114,6 +114,49 @@ class BazaDanych
         $parametry = ['i', &$idTrenera];
 
         return $this->wykonajZapytanieDoBazy($trescZapytania, $parametry, true, false);
+    }
+
+    public function pobierzKalendarzeTrenerow()
+    {
+        $trescZapytania = 'SELECT k.id, k.uzytkownik, k.dzien, k.zapisany, u.imie, u.nazwisko FROM kalendarz k JOIN uzytkownik u ON (k.trener = u.id_trenera)';
+
+        return $this->wykonajZapytanieDoBazy($trescZapytania, null, true, false);
+    }
+
+    public function pobierzListeUzytkownikow()
+    {
+        $trescZapytania = 'SELECT id, imie, nazwisko FROM uzytkownik WHERE id_trenera IS NULL AND administrator = 0';
+
+        $parametry = null;
+
+        return $this->wykonajZapytanieDoBazy($trescZapytania, $parametry, true, false);
+    }
+
+    public function usunUzytkownika($id)
+    {
+        $trescZapytania = 'DELETE FROM uzytkownik WHERE id = ?';
+
+        $parametry = ['i', &$id];
+
+        return $this->wykonajZapytanieDoBazy($trescZapytania, $parametry);
+    }
+
+    public function usunWpisyUzytkownika($id)
+    {
+        $trescZapytania = 'DELETE FROM kalendarz WHERE uzytkownik = ?';
+
+        $parametry = ['i', &$id];
+
+        return $this->wykonajZapytanieDoBazy($trescZapytania, $parametry);
+    }
+
+    public function usunWpisKalendarza($id)
+    {
+        $trescZapytania = 'DELETE FROM kalendarz WHERE id = ?';
+
+        $parametry = ['i', &$id];
+
+        return $this->wykonajZapytanieDoBazy($trescZapytania, $parametry);
     }
 
     /**
