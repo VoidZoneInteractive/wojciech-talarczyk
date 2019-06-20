@@ -260,6 +260,12 @@ class Kontroler
         return $szablon;
     }
 
+    /**
+     * Strona panelu administratora.
+     *
+     * @return bool|mixed|null|string|string[]
+     * @throws \Exception
+     */
     public function panelAdministratora()
     {
         if (!$this->uzytkownik->uzytkownikJestAdministratorem()) {
@@ -286,6 +292,10 @@ class Kontroler
         return $szablon;
     }
 
+    /**
+     * Akcja usunięcia wpisu kalendarza dla konkretnego użytkownika/dnia/trenera.
+     * @throws \Exception
+     */
     public function usunWpisKalendarza()
     {
         if (!$this->uzytkownik->uzytkownikJestAdministratorem()) {
@@ -305,6 +315,10 @@ class Kontroler
         exit();
     }
 
+    /**
+     * Akcja usunięcia użytkownika z bazy danych wraz z jego wpisami kalendarza.
+     * @throws \Exception
+     */
     public function usunUzytkownika()
     {
         if (!$this->uzytkownik->uzytkownikJestAdministratorem()) {

@@ -60,12 +60,20 @@ class Uzytkownik
         return $uzytkownik && $uzytkownik['id_trenera'];
     }
 
+    /**
+     * Funkcja sprawdzająca czy użytkownik ma uprawnienia administratora
+     * @return bool
+     */
     public function uzytkownikJestAdministratorem() {
         $uzytkownik = $this->pobierzUzytkownikaZSesji();
 
         return $uzytkownik && !empty($uzytkownik['administrator']);
     }
 
+    /**
+     * Metoda odwołująca się do funkcji bazodanowej usuwającej użytkownika
+     * @param $id
+     */
     public function usunUzytkownika($id) {
         $this->bazaDanych->usunUzytkownika($id);
     }
@@ -125,6 +133,14 @@ class Uzytkownik
         exit();
     }
 
+    /**
+     * Sprawdzenie, czy wszystkie dane rejestracji są poprawne.
+     * @param string|null $imie
+     * @param string $nazwisko
+     * @param string|null $login
+     * @param string $haslo
+     * @return array
+     */
     public function sprawdzPoprawnoscDanychRejestracji(string $imie = null, string $nazwisko, string $login = null, string $haslo)
     {
         $walidacja = [];
@@ -148,23 +164,47 @@ class Uzytkownik
         return $walidacja;
     }
 
+    /**
+     * Metoda sprawdzająca czy login użyty do rejestracji jest poprawny (nie jest pusty i jest prawidłowym adresem e-mail)
+     * @param string|null $login
+     * @return null|string
+     */
     private function sprawdzLogin(string $login = null)
     {
         return (!empty($login) && filter_var($login, FILTER_VALIDATE_EMAIL)) ? null : 'Niepoprawny email';
     }
 
+    /**
+     * Metoda sprawdzająca czy imię użyte do rejestracji jest poprawne (nie jest puste)
+     * @param string|null $imie
+     * @return null|string
+     */
     private function sprawdzImie(string $imie = null) {
         return !empty($imie) ? null : 'Niepoprawne imię';
     }
 
+    /**
+     * Metoda sprawdzająca czy nazwisko użyte do rejestracji jest poprawne (nie jest puste)
+     * @param string|null $nazwisko
+     * @return null|string
+     */
     private function sprawdzNazwisko(string $nazwisko = null) {
         return !empty($nazwisko) ? null : 'Niepoprawne imię';
     }
 
+    /**
+     * Metoda sprawdzająca czy hasło użyte do rejestracji jest poprawne (nie jest puste i ma co najmniej 5 znaków)
+     * @param string|null $haslo
+     * @return null|string
+     */
     private function sprawdzHaslo(string $haslo = null) {
         return (!empty($haslo) && strlen($haslo) > 4) ? null : 'Niepoprawne hasło (musi mieć przynajmniej 5 znaków)';
     }
 
+    /**
+     * Metoda wykorzystująca pobranie danych użytkowników do panelu administracyjnego
+     * @return array
+     */
     public function pobierzListeUzytkownikow()
     {
         return $this->bazaDanych->pobierzListeUzytkownikow();

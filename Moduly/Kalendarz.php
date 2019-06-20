@@ -86,6 +86,10 @@ class Kalendarz
         return $parametry;
     }
 
+    /**
+     * Przygotowanie kalendarza wyświetlanego w panelu administratora.
+     * @return string
+     */
     public function przygotujParametrySzablonuAdministratora()
     {
         $daneKalendarzy = $this->bazaDanych->pobierzKalendarzeTrenerow();
@@ -118,6 +122,12 @@ class Kalendarz
         return '<ul><li>' . implode('</li><li>', $uzytkownicy) . '</li></ul>';
     }
 
+    /**
+     * Przygotowanie listy kalendarzy trenerów wraz z użytkownikami wyświetlanej w panelu administratora (gdzie można je usunąć)
+     *
+     * @param array $uzytkownicy
+     * @return string
+     */
     public function przygotujListeUzytkownikowKalendarzaAdministratora(array $uzytkownicy)
     {
         foreach ($uzytkownicy as &$uzytkownik) {
@@ -126,6 +136,11 @@ class Kalendarz
         return '<ul><li>' . implode('</li><li>', $uzytkownicy) . '</li></ul>';
     }
 
+    /**
+     * Przygotowanie listy użytkowników wyświetlanej w panelu administratora (gdzie można ich usunąć)
+     * @param array $uzytkownicy
+     * @return string
+     */
     public function przygotujListeUzytkownikowAdministratora(array $uzytkownicy)
     {
         foreach ($uzytkownicy as &$uzytkownik) {
@@ -134,6 +149,10 @@ class Kalendarz
         return '<ul><li>' . implode('</li><li>', $uzytkownicy) . '</li></ul>';
     }
 
+    /**
+     * Wywołanie funkcji bazodanowej usuwającej wpis kalendarza w panelu administracyjnym.
+     * @param $id
+     */
     public function usunWpisKalendarza($id) {
         $this->bazaDanych->usunWpisKalendarza($id);
     }
@@ -183,6 +202,11 @@ class Kalendarz
         return $rezultat;
     }
 
+    /**
+     * Sformatowanie danych kalendarzy trenerów wykorzystywane w panelu administratora.
+     * @param array $daneKalendarzy
+     * @return array
+     */
     public function przetworzKalendarze(array $daneKalendarzy)
     {
         $rezultat = [];
@@ -206,6 +230,10 @@ class Kalendarz
         return $rezultat;
     }
 
+    /**
+     * Metoda wywołująca funkcję bazodanową usuwającą wpisy użytkownika.
+     * @param $id
+     */
     public function usunWpisyUzytkownika($id)
     {
         $this->bazaDanych->usunWpisyUzytkownika($id);

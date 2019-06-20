@@ -116,6 +116,10 @@ class BazaDanych
         return $this->wykonajZapytanieDoBazy($trescZapytania, $parametry, true, false);
     }
 
+    /**
+     * Pobranie kalendarzy dla trenera - do zapytania dowiązujemy jeszcze imię i nazwisko trenera).
+     * @return array
+     */
     public function pobierzKalendarzeTrenerow()
     {
         $trescZapytania = 'SELECT k.id, k.uzytkownik, k.dzien, k.zapisany, u.imie, u.nazwisko FROM kalendarz k JOIN uzytkownik u ON (k.trener = u.id_trenera)';
@@ -132,6 +136,12 @@ class BazaDanych
         return $this->wykonajZapytanieDoBazy($trescZapytania, $parametry, true, false);
     }
 
+    /**
+     * Usunięcie użytkownika przy wykorzystaniu jego identyfikatora (id).
+     *
+     * @param $id
+     * @return array
+     */
     public function usunUzytkownika($id)
     {
         $trescZapytania = 'DELETE FROM uzytkownik WHERE id = ?';
@@ -141,6 +151,11 @@ class BazaDanych
         return $this->wykonajZapytanieDoBazy($trescZapytania, $parametry);
     }
 
+    /**
+     * Usunięcie wszystkich wpisów z kalendarza na podstawie id użytkwonika (używane przy usuwaniu użytkownika, żeby nie było problemów w bazie z niepowiązanymi danymi)
+     * @param $id
+     * @return array
+     */
     public function usunWpisyUzytkownika($id)
     {
         $trescZapytania = 'DELETE FROM kalendarz WHERE uzytkownik = ?';
@@ -150,6 +165,12 @@ class BazaDanych
         return $this->wykonajZapytanieDoBazy($trescZapytania, $parametry);
     }
 
+    /**
+     * Usunięcie wpisu z kalendarza na podstawie identyfikatora wpisu (id).
+     *
+     * @param $id
+     * @return array
+     */
     public function usunWpisKalendarza($id)
     {
         $trescZapytania = 'DELETE FROM kalendarz WHERE id = ?';
