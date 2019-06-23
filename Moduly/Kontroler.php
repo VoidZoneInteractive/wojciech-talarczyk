@@ -25,6 +25,9 @@ class Kontroler
                 return $this->wylogowywanie();
             case 'rejestracja':
                 return $this->rejestracja();
+            case 'edycja':
+                $idUzytkownika = $this->pobierzIdUzytkownikaZUrl();
+                return $this->edycja($idUzytkownika);
             case 'rejestracjaPodziekowanie':
                 return $this->rejestracjaPodziekowanie();
             case 'stronaGlowna':
@@ -67,7 +70,7 @@ class Kontroler
             $haslo = $_POST['haslo'];
 
             // Ta metoda sprawdza poprawnosc danych do rejestracji
-            $walidacja = $this->uzytkownik->sprawdzPoprawnoscDanychRejestracji($imie, $nazwisko, $login, $haslo);
+            $walidacja = $this->uzytkownik->sprawdzPoprawnoscDanych($imie, $nazwisko, $login, $haslo);
 
             // Sprawdz poprawnosc danych - jeżeli funkcja zwrocila cos innego niz null, wyswietl sformatowana wiadomosc
             if ($walidacja) {
@@ -92,6 +95,57 @@ class Kontroler
             exit();
         } else {
             $szablon = $this->szablon->zwrocSzablon($this->nazwa_strony);
+        }
+
+        return $szablon;
+    }
+
+    public function edycja($idUzytkownika)
+    {
+        if (!$this->uzytkownik->uzytkownikJestAdministratorem()) {
+            // Przekierowujemy na stronę logowania, bo nie znaleziono zalogowanego użytkownika albo uzytkownik nie jest adminem
+            header('Location: /?strona=logowanie');
+            exit();
+        }
+
+        // Sprawdzamy czy ktos wyslal dane formularza
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $imie = $_POST['imie'];
+            $nazwisko = $_POST['nazwisko'];
+            $login = $_POST['login'];
+
+            // Ta metoda sprawdza poprawnosc danych do edycji
+            $walidacja = $this->uzytkownik->sprawdzPoprawnoscDanych($imie, $nazwisko, $login, false);
+
+            // Sprawdz poprawnosc danych - jeżeli funkcja zwrocila cos innego niz null, wyswietl sformatowana wiadomosc
+            if ($walidacja) {
+                $szablon = $this->szablon->zwrocSzablon(
+                    $this->nazwa_strony,
+                    [
+                        '%{imie}' => 'value="' . $imie . '"',
+                        '%{nazwisko}' => 'value="' . $nazwisko . '"',
+                        '%{login}' => 'value="' . $login . '"',
+                        '%{wiadomosc}' => 'Wystapił błąd przy edycji:<br /><ul><li>' . implode('</li><li>', $walidacja) . '</li></ul>',
+                        '%{styl_wiadomosci}' => 'display: block;',
+                    ]
+                );
+
+                return $szablon;
+            }
+
+            $this->uzytkownik->aktualizujUzytkownika($idUzytkownika, $imie, $nazwisko, $login);
+
+            // Przekierowujemy uzytkownika na strone z podziekowaniami za rejestracje
+            header('Location: /?strona=panelAdministratora');
+            exit();
+        } else {
+            $uzytkownik = $this->uzytkownik->zwrocUzytkownikaPoId($idUzytkownika);
+            $parametry = [
+                '%{imie}' => 'value="' . $uzytkownik['imie'] . '"',
+                '%{nazwisko}' => 'value="' . $uzytkownik['nazwisko'] . '"',
+                '%{login}' => 'value="' . $uzytkownik['login'] . '"',
+            ];
+            $szablon = $this->szablon->zwrocSzablon($this->nazwa_strony, $parametry);
         }
 
         return $szablon;
@@ -174,7 +228,7 @@ class Kontroler
         return $szablon;
     }
 
-    public function panelTrenera($dzien)
+    public function panelTrenera()
     {
         if (!$this->uzytkownik->uzytkownikJestTrenerem()) {
             // Przekierowujemy na stronę logowania, bo nie znaleziono zalogowanego użytkownika albo uzytkownik nie jest trenerem
@@ -185,7 +239,7 @@ class Kontroler
         $kalendarz = new Kalendarz();
 
 
-        $parametry = $kalendarz->przygotujParametrySzablonuTrenera($dzien);
+        $parametry = $kalendarz->przygotujParametrySzablonuTrenera();
 
         $szablon = $this->szablon->zwrocSzablon($this->nazwa_strony, $parametry);
 
@@ -204,14 +258,22 @@ class Kontroler
 
         $uzytkownicy = $this->uzytkownik->pobierzListeUzytkownikow();
 
+        $trenerzy = $this->uzytkownik->pobierzListeTrenerow();
+
         foreach ($uzytkownicy as &$uzytkownik) {
             $uzytkownik = ['dane' => sprintf('%s %s', $uzytkownik['imie'], $uzytkownik['nazwisko']), 'id' => $uzytkownik['id']];
         }
 
+        foreach ($trenerzy as &$trener) {
+            $trener = ['dane' => sprintf('%s %s', $trener['imie'], $trener['nazwisko']), 'id' => $trener['id']];
+        }
+
         $parametry = [
-            '%{wpisy}' => $kalendarz->przygotujParametrySzablonuAdministratora(),
             '%{lista-uzytkownikow}' => $kalendarz->przygotujListeUzytkownikowAdministratora($uzytkownicy),
+            '%{lista-trenerow}' => $kalendarz->przygotujListeTrenerowAdministratora($trenerzy),
         ];
+
+        $parametry = array_merge($parametry, $kalendarz->przygotujParametrySzablonuAdministratora($dzien));
 
         $szablon = $this->szablon->zwrocSzablon($this->nazwa_strony, $parametry);
 
@@ -287,6 +349,15 @@ class Kontroler
             return $_GET['dzien'];
         } else {
             return Kalendarz::DNI[0];
+        }
+    }
+
+    private function pobierzIdUzytkownikaZUrl()
+    {
+        if (!empty($_GET['id_uzytkownika'])) {
+            return $_GET['id_uzytkownika'];
+        } else {
+            return null;
         }
     }
 }

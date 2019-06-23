@@ -54,37 +54,22 @@ class Kalendarz
 
         $parametry['%{wpisy}'] = $this->przygotujWypisyUzytkownikowDlaTrenera($daneKalendarza, $idTrenera);
 
-//        foreach (self::GODZINY as $godzina) {
-//            foreach (self::GODZINY as $godzina) {
-//
-//            }
-//            $klucz = sprintf('%%{uzytkownicy-%s}', $godzina);
-//
-//            $parametry[$klucz] = !empty($daneKalendarza[$dzien]) ? $this->przygotujListeUzytkownikow($daneKalendarza[$dzien]) : 'Brak zapisanych.';
-//        }
-
         return $parametry;
     }
 
-    public function przygotujParametrySzablonuAdministratora()
+    public function przygotujParametrySzablonuAdministratora($dzien)
     {
         $daneKalendarzy = $this->bazaDanych->pobierzKalendarzeTrenerow();
         $daneKalendarzy = $this->przetworzKalendarze($daneKalendarzy);
 
         $wpisy = '';
 
-        foreach ($daneKalendarzy as $trener => $daneKalendarza) {
-            $parametry = ['%{trener}' => $trener];
+        $parametry = [];
+        $parametry['%{wpisy}'] = $this->przygotujWpisyTrenerowDlaAdministratora($dzien, $daneKalendarzy);
 
-            foreach (self::DNI as $dzien) {
-                $klucz = sprintf('%%{uzytkownicy-%s}', $dzien);
-                $parametry[$klucz] = !empty($daneKalendarza[$dzien]) ? $this->przygotujListeUzytkownikowKalendarzaAdministratora($daneKalendarza[$dzien]) : 'Brak zapisanych.';
-            }
+        $parametry['%{dni}'] = $this->przygotujListeDni('panelAdministratora', $dzien);
 
-            $wpisy .= $this->szablon->zwrocSzablon('panelAdministratora-wpis', $parametry);
-        }
-
-        return $wpisy;
+        return $parametry;
     }
 
     public function przygotujListeUzytkownikow(array $uzytkownicy)
@@ -103,7 +88,15 @@ class Kalendarz
     public function przygotujListeUzytkownikowAdministratora(array $uzytkownicy)
     {
         foreach ($uzytkownicy as &$uzytkownik) {
-            $uzytkownik = $uzytkownik['dane'] . ' <a href=" /?strona=usunUzytkownika&id='.$uzytkownik['id'].'" onclick="if(!confirm(\'Czy napewno usunąć użytkownika: '.$uzytkownik['dane'].'?\')) { return false; }">usuń</a>';
+            $uzytkownik = $uzytkownik['dane'] . ' <a href=" /?strona=edycja&id_uzytkownika='.$uzytkownik['id'].'">edytuj</a> <a href=" /?strona=usunUzytkownika&id='.$uzytkownik['id'].'" onclick="if(!confirm(\'Czy napewno usunąć użytkownika: '.$uzytkownik['dane'].'?\')) { return false; }">usuń</a>';
+        }
+        return '<ul><li>' . implode('</li><li>', $uzytkownicy) . '</li></ul>';
+    }
+
+    public function przygotujListeTrenerowAdministratora(array $uzytkownicy)
+    {
+        foreach ($uzytkownicy as &$uzytkownik) {
+            $uzytkownik = $uzytkownik['dane'] . ' <a href=" /?strona=edycja&id_uzytkownika='.$uzytkownik['id'].'">edytuj</a> <a href=" /?strona=usunUzytkownika&id='.$uzytkownik['id'].'" onclick="if(!confirm(\'Czy napewno usunąć użytkownika: '.$uzytkownik['dane'].'?\')) { return false; }">usuń</a>';
         }
         return '<ul><li>' . implode('</li><li>', $uzytkownicy) . '</li></ul>';
     }
@@ -155,13 +148,9 @@ class Kalendarz
                 $rezultat[$trener] = [];
             }
 
-            if (empty($rezultat[$trener][$wpisKalendarza['dzien']])) {
-                $rezultat[$trener][$wpisKalendarza['dzien']] = [];
-            }
-
             if (!empty($wpisKalendarza['zapisany'])) {
                 $uzytkownik = $this->bazaDanych->pobierzNazweUzytkownikaPoId($wpisKalendarza['uzytkownik']);
-                $rezultat[$trener][$wpisKalendarza['dzien']][] = ['dane' => sprintf('%s %s', $uzytkownik['imie'], $uzytkownik['nazwisko']), 'id_kalendarza' => $wpisKalendarza['id']];
+                $rezultat[$trener][$wpisKalendarza['dzien']][$wpisKalendarza['godzina']][$wpisKalendarza['trening']][] = ['dane' => sprintf('%s %s', $uzytkownik['imie'], $uzytkownik['nazwisko']), 'id_kalendarza' => $wpisKalendarza['id']];
             }
         }
 
@@ -246,8 +235,6 @@ class Kalendarz
             if (!isset($godzinaDoPokazania)) {
                 $godzinaDoPokazania = $godzina;
             }
-
-            $licznik = 0;
         }
 
         return implode('', $rzedy);
@@ -293,11 +280,60 @@ class Kalendarz
             if (!isset($godzinaDoPokazania)) {
                 $godzinaDoPokazania = $godzina;
             }
-
-            $licznik = 0;
         }
 
         return implode('',$rzedy);
+    }
+
+    private function przygotujWpisyTrenerowDlaAdministratora($dzien, $daneKalendarza)
+    {
+        $rzedy = [];
+
+        foreach (self::GODZINY as $idGodziny => $godzina) {
+            $treningi = $this->bazaDanych->pobierzTreningiDlaGodziny($idGodziny);
+
+            $rzadParametry = [
+                '%{godzina}' => '<td rowspan="' . count($treningi) . '">' . $godzina . '</td>',
+            ];
+
+            $licznik = 0;
+
+            foreach ($treningi as $trening) {
+                $imieTrenera = $trening['imie'];
+                $nazwiskoTrenera = $trening['nazwisko'];
+
+                $trener = sprintf('%s %s', $imieTrenera, $nazwiskoTrenera);
+
+                $rzadParametry['%{trening}'] = '<td>' . $trening['nazwa'] . '</td>';
+                $rzadParametry['%{trener}'] = '<td>' . $trener . '</td>';
+                $zapisy = [];
+
+                $parametryLinii = [];
+
+                if (empty($daneKalendarza[$trener][$dzien][$idGodziny])) {
+                    $parametryLinii['%{zapisy}'] = 'Brak Zapisow';
+                } else {
+                    $parametryLinii['%{zapisy}'] = $this->przygotujListeUzytkownikowKalendarzaAdministratora($daneKalendarza[$trener][$dzien][$idGodziny][$trening['id_treningu']]);
+                }
+
+                $zapisy[] = $this->szablon->zwrocSzablon('panelAdministratora-linia', $parametryLinii);
+
+
+                $rzadParametry['%{zapisy}'] = implode('', $zapisy);
+
+                $licznik++;
+
+                $rzedy[] = $this->szablon->zwrocSzablon('panelAdministratora-rzad', $rzadParametry);
+
+                unset($rzadParametry['%{godzina}']);
+            }
+
+            if (!isset($godzinaDoPokazania)) {
+                $godzinaDoPokazania = $godzina;
+            }
+        }
+
+        return implode('', $rzedy);
     }
 
     private function przetworzDane(array $dane)

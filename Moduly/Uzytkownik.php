@@ -28,6 +28,12 @@ class Uzytkownik
         return $uzytkownik;
     }
 
+    public function zwrocUzytkownikaPoId($idUzytkownika)
+    {
+        $uzytkownik = $this->bazaDanych->pobierzUzytkownikaPoId($idUzytkownika);
+        return $uzytkownik;
+    }
+
     public function uzytkownikJestTrenerem() {
         $uzytkownik = $this->pobierzUzytkownikaZSesji();
 
@@ -79,7 +85,7 @@ class Uzytkownik
         exit();
     }
 
-    public function sprawdzPoprawnoscDanychRejestracji(string $imie = null, string $nazwisko, string $login = null, string $haslo)
+    public function sprawdzPoprawnoscDanych(string $imie = null, string $nazwisko, string $login = null, $haslo)
     {
         $walidacja = [];
 
@@ -95,7 +101,7 @@ class Uzytkownik
             $walidacja[] = $walidujLogin;
         }
 
-        if ($walidujHaslo = $this->sprawdzHaslo($haslo)) {
+        if ($haslo !== false && $walidujHaslo = $this->sprawdzHaslo($haslo)) {
             $walidacja[] = $walidujHaslo;
         }
 
@@ -124,12 +130,26 @@ class Uzytkownik
         return $this->bazaDanych->pobierzListeUzytkownikow();
     }
 
+    public function pobierzListeTrenerow()
+    {
+        return $this->bazaDanych->pobierzListeTrenerow();
+    }
+
     public function zarejestrujUzytkownika(string $imie, string $nazwisko, string $login, string $haslo)
     {
         $haslo = $this->szyfrujHaslo($haslo);
 
         try {
             $this->bazaDanych->dodajUzytkownikaDoBazy($imie, $nazwisko, $login, $haslo);
+        } catch (\Exception $e) {
+            throw $e;
+        }
+    }
+
+    public function aktualizujUzytkownika(int $idUzytkownika, string $imie, string $nazwisko, string $login)
+    {
+        try {
+            $this->bazaDanych->aktualizujUzytkownikaWBazie($idUzytkownika, $imie, $nazwisko, $login);
         } catch (\Exception $e) {
             throw $e;
         }

@@ -32,11 +32,28 @@ class BazaDanych
         $this->wykonajZapytanieDoBazy($trescZapytania, $parametry);
     }
 
+    public function aktualizujUzytkownikaWBazie(int $idUzytkownika, string $imie, string $nazwisko, string $login)
+    {
+        $trescZapytania = 'UPDATE uzytkownik SET imie = ?, nazwisko = ?, login = ? WHERE id = ?;';
+        $parametry = ['sssi', &$imie, &$nazwisko, &$login, &$idUzytkownika];
+
+        $this->wykonajZapytanieDoBazy($trescZapytania, $parametry);
+    }
+
     public function pobierzUzytkownika(string $login)
     {
         $trescZapytania = 'SELECT id, imie, nazwisko, login, haslo, id_trenera, administrator FROM uzytkownik WHERE login = ?';
 
         $parametry = ['s', &$login];
+
+        return $this->wykonajZapytanieDoBazy($trescZapytania, $parametry, true);
+    }
+
+    public function pobierzUzytkownikaPoId(int $idUzytkownika)
+    {
+        $trescZapytania = 'SELECT id, imie, nazwisko, login, haslo, id_trenera, administrator FROM uzytkownik WHERE id = ?';
+
+        $parametry = ['i', &$idUzytkownika];
 
         return $this->wykonajZapytanieDoBazy($trescZapytania, $parametry, true);
     }
@@ -70,7 +87,7 @@ class BazaDanych
 
     public function pobierzKalendarzeTrenerow()
     {
-        $trescZapytania = 'SELECT k.id, k.uzytkownik, k.dzien, k.zapisany, u.imie, u.nazwisko FROM kalendarz k JOIN uzytkownik u ON (k.trener = u.id_trenera)';
+        $trescZapytania = 'SELECT k.id, k.uzytkownik, k.dzien, k.godzina, k.trening, k.zapisany, u.imie, u.nazwisko FROM kalendarz k JOIN uzytkownik u ON (k.trener = u.id_trenera)';
 
         return $this->wykonajZapytanieDoBazy($trescZapytania, null, true, false);
     }
@@ -78,6 +95,15 @@ class BazaDanych
     public function pobierzListeUzytkownikow()
     {
         $trescZapytania = 'SELECT id, imie, nazwisko FROM uzytkownik WHERE id_trenera IS NULL AND administrator = 0';
+
+        $parametry = null;
+
+        return $this->wykonajZapytanieDoBazy($trescZapytania, $parametry, true, false);
+    }
+
+    public function pobierzListeTrenerow()
+    {
+        $trescZapytania = 'SELECT id, imie, nazwisko FROM uzytkownik WHERE id_trenera IS NOT NULL AND administrator = 0';
 
         $parametry = null;
 
@@ -143,6 +169,15 @@ class BazaDanych
         $trescZapytania = 'SELECT trening.nazwa, trening.id AS id_treningu FROM trening_trener JOIN trening ON (trening_trener.trening = trening.id) WHERE trening_trener.godzina = ? AND trening_trener.trener = ?';
 
         $parametry = ['ii', &$idGodziny, &$idTrenera];
+
+        return $this->wykonajZapytanieDoBazy($trescZapytania, $parametry, true, false);
+    }
+
+    public function pobierzTreningiTrenerow($idGodziny)
+    {
+        $trescZapytania = 'SELECT trening.nazwa, trening.id AS id_treningu, trener FROM trening_trener JOIN trening ON (trening_trener.trening = trening.id) WHERE trening_trener.godzina = ?;';
+
+        $parametry = ['i', &$idGodziny];
 
         return $this->wykonajZapytanieDoBazy($trescZapytania, $parametry, true, false);
     }

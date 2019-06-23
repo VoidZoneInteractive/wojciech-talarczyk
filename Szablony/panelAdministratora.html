@@ -8,46 +8,17 @@
     <meta name="author" content="Wojciech Talarczyk">
 
     <style type="text/css">
-        .kalendarz {
-            width: 90%;
-            margin: 20px 5%;
-            border: 1px dashed #999;
-
-            display: flex;
-            flex-direction: row;
-            flex-flow: row wrap;
+        .tabela-treningow {
+            width: 100%;
         }
 
-        .kalendarz-naglowek {
-            border: 1px dotted #990000;
-            width: 18%;
-            box-sizing: border-box;
-            padding: 5px;
-            flex: auto;
+        table tr td, table tr th {
+            border: 1px solid #999;
         }
 
-        .kalendarz-naglowek:nth-child(6n + 0) {
-            border: 1px dotted #990000;
-            width: 10%;
-            box-sizing: border-box;
-            padding: 5px;
-            flex: auto;
-        }
-
-        .kalendarz-zapis {
-            border: 1px dotted #009900;
-            width: 18%;
-            box-sizing: border-box;
-            padding: 5px;
-            flex: auto;
-        }
-
-        .kalendarz-zapis:nth-child(6n + 0) {
-            border: 1px dotted #009900;
-            width: 10%;
-            box-sizing: border-box;
-            padding: 5px;
-            flex: auto;
+        .dni-nawigacja {
+            margin: 0 auto;
+            text-align: center;
         }
     </style>
 
@@ -59,31 +30,33 @@
 
 <div><a href="/?strona=wylogowywanie">Wyloguj sie</a></div>
 
+<div class="dni-nawigacja">%{dni}</div>
+
 <form name="kalendarz" method="post" action="">
     <div class="kalendarz">
-        <div class="kalendarz-naglowek">
-            Trener
-        </div>
-        <div class="kalendarz-naglowek">
-            Poniedziałek
-        </div>
-        <div class="kalendarz-naglowek">
-            Wtorek
-        </div>
-        <div class="kalendarz-naglowek">
-            Środa
-        </div>
-        <div class="kalendarz-naglowek">
-            Czwartek
-        </div>
-        <div class="kalendarz-naglowek">
-            Piątek
-        </div>
-
-        %{wpisy}
+        <table class="tabela-treningow">
+            <tr>
+                <th>
+                    Godzina
+                </th>
+                <th>
+                    Trening
+                </th>
+                <th>
+                    Trener
+                </th>
+                <th>
+                    Zapis
+                </th>
+            </tr>
+            %{wpisy}
+        </table>
     </div>
 </form>
 
+Użytkownicy:<br />
 %{lista-uzytkownikow}
+<br />Trenerzy:<br />
+%{lista-trenerow}
 </body>
 </html>
