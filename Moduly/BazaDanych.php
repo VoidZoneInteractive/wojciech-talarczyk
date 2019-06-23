@@ -52,7 +52,7 @@ class BazaDanych
 
     public function pobierzKalendarzUzytkownika($idUzytkownika)
     {
-        $trescZapytania = 'SELECT trener, dzien, zapisany FROM kalendarz WHERE uzytkownik = ?';
+        $trescZapytania = 'SELECT trener, dzien, godzina, trening, zapisany FROM kalendarz WHERE uzytkownik = ?';
 
         $parametry = ['i', &$idUzytkownika];
 
@@ -111,13 +111,31 @@ class BazaDanych
         return $this->wykonajZapytanieDoBazy($trescZapytania, $parametry);
     }
 
-    public function aktualizujKalendarz(int $trener, string $dzien, int $zapisany, int $idUzytkownika)
+    public function aktualizujKalendarz(int $trener, string $dzien, int $godzina, int $trening, int $zapisany, int $idUzytkownika)
     {
-        $trescZapytania = 'REPLACE INTO kalendarz (trener, dzien, zapisany, uzytkownik) VALUES (?, ?, ?, ?)';
+        $trescZapytania = 'REPLACE INTO kalendarz (trener, dzien, godzina, trening, zapisany, uzytkownik) VALUES (?, ?, ?, ?, ?, ?)';
 
-        $parametry = ['isii', &$trener, &$dzien, &$zapisany, &$idUzytkownika];
+        $parametry = ['isiiii', &$trener, &$dzien, &$godzina, &$trening, &$zapisany, &$idUzytkownika];
 
         return $this->wykonajZapytanieDoBazy($trescZapytania, $parametry);
+    }
+
+    public function pobierzTrenerowZTreningami()
+    {
+        $trescZapytania = 'SELECT DISTINCT id, imie, nazwisko, id_trenera FROM uzytkownik LEFT JOIN trening_trener ON (trening_trener.trener = uzytkownik.id_trenera) WHERE id_trenera IS NOT NULL AND administrator = 0 AND trening_trener.trening IS NOT NULL';
+
+        $parametry = null;
+
+        return $this->wykonajZapytanieDoBazy($trescZapytania, $parametry, true, false);
+    }
+
+    public function pobierzTreningiDlaGodziny($idGodziny)
+    {
+        $trescZapytania = 'SELECT trening.nazwa, trening.id AS id_treningu, id_trenera, imie, nazwisko FROM trening_trener JOIN trening ON (trening_trener.trening = trening.id) JOIN uzytkownik ON (trening_trener.trener = uzytkownik.id_trenera) WHERE trening_trener.godzina = ?';
+
+        $parametry = ['i', &$idGodziny];
+
+        return $this->wykonajZapytanieDoBazy($trescZapytania, $parametry, true, false);
     }
 
     private function wykonajZapytanieDoBazy(

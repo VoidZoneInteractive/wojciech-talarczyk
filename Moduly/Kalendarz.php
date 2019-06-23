@@ -4,7 +4,16 @@ namespace Moduly;
 
 class Kalendarz
 {
-    const DNI = ['poniedzialek', 'wtorek', 'sroda', 'czwartek', 'piatek'];
+    const DNI = ['poniedziałek', 'wtorek', 'środa', 'czwartek', 'piątek'];
+    const GODZINY = [
+        1 => '08:00 - 09:30',
+        2 => '10:00 - 11:30',
+        3 => '11:45 - 13:15',
+        4 => '13:30 - 15:00',
+        5 => '16:15 - 17:45',
+        6 => '18:00 - 19:30',
+        7 => '20:00 - 21:30',
+    ];
     const ID_TRENEROW = [1, 2];
 
     private $bazaDanych;
@@ -22,38 +31,30 @@ class Kalendarz
         $this->szablon = new Szablon();
     }
 
-    public function przygotujParametrySzablonuUzytkownika()
+    public function przygotujParametrySzablonuUzytkownika($dzien)
     {
         $daneKalendarza = $this->bazaDanych->pobierzKalendarzUzytkownika($this->uzytkownik->zwrocUzytkownika()['id']);
         $daneKalendarza = $this->przetworzKalendarzUzytkownika($daneKalendarza);
 
         $parametry = [];
+        $parametry['%{wpisy}'] = $this->przygotujWpisyTrenerowDlaUzytkownika($dzien, $daneKalendarza);;
 
-        foreach (self::DNI as $dzien) {
-            foreach (self::ID_TRENEROW as $trener) {
-                $wartoscKlucz = sprintf('%%{wartosc-trener_%d-%s}', $trener, $dzien);
-                $przyciskKlucz = sprintf('%%{przycisk-trener_%d-%s}', $trener, $dzien);
-                $nowaWartosc = isset($daneKalendarza[$trener][$dzien]) ? (int)!$daneKalendarza[$trener][$dzien] : 1;
-
-                $parametry[$wartoscKlucz] = $nowaWartosc;
-                $parametry[$przyciskKlucz] = $nowaWartosc ? 'Zapisz się' : 'Wypisz się';
-            }
-        }
+        $parametry['%{dni}'] = $this->przygotujListeDni('panelUzytkownika', $dzien);
 
         return $parametry;
     }
 
-    public function przygotujParametrySzablonuTrenera()
+    public function przygotujParametrySzablonuTrenera($dzien)
     {
         $daneKalendarza = $this->bazaDanych->pobierzKalendarzTrenera($this->uzytkownik->zwrocUzytkownika()['id_trenera']);
         $daneKalendarza = $this->przetworzKalendarzTrenera($daneKalendarza);
 
         $parametry = [];
 
-        foreach (self::DNI as $dzien) {
-            $klucz = sprintf('%%{uzytkownicy-%s}', $dzien);
+        foreach (self::GODZINY as $godzina) {
+            $klucz = sprintf('%%{uzytkownicy-%s}', $godzina);
 
-            $parametry[$klucz] = !empty($daneKalendarza[$dzien]) ? $this->przygotujListeUzytkownikow($daneKalendarza[$dzien]) : 'Brak zapisanych.';
+            $parametry[$klucz] = !empty($daneKalendarza[$dzien]) ? $this->przygotujListeUzytkownikow($daneKalendarza[$godzina]) : 'Brak zapisanych.';
         }
 
         return $parametry;
@@ -114,7 +115,7 @@ class Kalendarz
                 $rezultat[$wpisKalendarza['trener']] = [];
             }
 
-            $rezultat[$wpisKalendarza['trener']][$wpisKalendarza['dzien']] = $wpisKalendarza['zapisany'];
+            $rezultat[$wpisKalendarza['trener']][$wpisKalendarza['dzien']][$wpisKalendarza['godzina']][$wpisKalendarza['trening']] = $wpisKalendarza['zapisany'];
         }
 
         return $rezultat;
@@ -171,15 +172,102 @@ class Kalendarz
         $dane = $this->przetworzDane($dane);
         $idUzytkownika = $this->uzytkownik->zwrocUzytkownika()['id'];
 
-        $this->bazaDanych->aktualizujKalendarz($dane['trener'], $dane['dzien'], (int)$dane['zapisany'], $idUzytkownika);
+        $this->bazaDanych->aktualizujKalendarz($dane['trener'], $dane['dzien'], (int)$dane['godzina'], (int)$dane['trening'], (int)$dane['zapisany'], $idUzytkownika);
+    }
+
+    private function przygotujListeDni($strona, $aktualny_dzien)
+    {
+        $wynik = [];
+
+        foreach (self::DNI as $dzien) {
+            if ($dzien == $aktualny_dzien) {
+                $wynik[] = $dzien;
+            } else {
+                $wynik[] = sprintf('<a href="?strona=%s&dzien=%s">%s</a>', $strona, $dzien, $dzien);
+            }
+        }
+
+        return implode(' | ', $wynik);
+    }
+
+    private function przygotujWpisyTrenerowDlaUzytkownika($dzien, $daneKalendarza) {
+        $trenerzy = $this->bazaDanych->pobierzTrenerowZTreningami();
+
+        $rzedy = [];
+
+        foreach (self::GODZINY as $idGodziny => $godzina) {
+            $treningi = $this->bazaDanych->pobierzTreningiDlaGodziny($idGodziny);
+
+            $rzadParametry = [
+                '%{godzina}' => '<td rowspan="'.count($treningi).'">' . $godzina . '</td>',
+            ];
+
+            $licznik = 0;
+
+            foreach ($treningi as $trening) {
+
+                $idTrenera = $trening['id_trenera'];
+                $imieTrenera = $trening['imie'];
+                $nazwiskoTrenera = $trening['nazwisko'];
+
+                $rzadParametry['%{trening}'] = '<td>' . $trening['nazwa'] . '</td>';
+                $rzadParametry['%{trener}'] = '<td>' . sprintf('%s %s', $imieTrenera, $nazwiskoTrenera) . '</td>';
+                $zapisy = [];
+
+                $zapisany = isset($daneKalendarza[$idTrenera][$dzien][$idGodziny][$trening['id_treningu']]) ? (int)!$daneKalendarza[$idTrenera][$dzien][$idGodziny][$trening['id_treningu']] : 1;
+
+                $parametryLinii = [
+                    '%{id}' => $idTrenera,
+                    '%{trener}' => sprintf('%s %s', $imieTrenera, $nazwiskoTrenera),
+                    '%{dzien}' => $dzien,
+                    '%{godzina}' => $idGodziny,
+                    '%{id_treningu}' => $trening['id_treningu'],
+                    '%{przycisk}' => $zapisany ? 'Zapisz się' : 'Wypisz się',
+                    '%{wartosc}' => $zapisany,
+                ];
+
+                $zapisy[] = $this->szablon->zwrocSzablon('panelUzytkownika-linia', $parametryLinii);
+
+
+                $rzadParametry['%{zapisy}'] = implode('', $zapisy);
+
+                $licznik++;
+
+                $rzedy[] = $this->szablon->zwrocSzablon('panelUzytkownika-rzad', $rzadParametry);
+
+                unset($rzadParametry['%{godzina}']);
+            }
+
+            if (!isset($godzinaDoPokazania)) {
+                $godzinaDoPokazania = $godzina;
+            }
+
+            $licznik = 0;
+        }
+
+        return implode('',$rzedy);
+    }
+
+    private function przygotujTrenerowUzytkowniow($trenerzy)
+    {
+        foreach ($trenerzy as &$trener) {
+            $trener = $this->szablon->zwrocSzablon('panelUzytkownika-trener', [
+                '%{imie}' => $trener['imie'],
+                '%{nazwisko}' => $trener['nazwisko'],
+            ]);
+        }
+
+        return $trenerzy;
     }
 
     private function przetworzDane(array $dane)
     {
         $trener = key($dane);
         $dzien = key($dane[$trener]);
-        $zapisany = $dane[$trener][$dzien];
+        $godzina = key($dane[$trener][$dzien]);
+        $trening = key($dane[$trener][$dzien][$godzina]);
+        $zapisany = $dane[$trener][$dzien][$godzina][$trening];
 
-        return ['trener' => $trener, 'dzien' => $dzien, 'zapisany' => $zapisany];
+        return ['trener' => $trener, 'dzien' => $dzien, 'godzina' => $godzina, 'trening' => $trening, 'zapisany' => $zapisany];
     }
 }

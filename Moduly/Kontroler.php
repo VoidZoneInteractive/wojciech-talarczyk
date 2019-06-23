@@ -17,6 +17,7 @@ class Kontroler
 
     public function akcja()
     {
+        $dzien = $this->pobierzDzienZUrl();
         switch ($this->nazwa_strony) {
             case 'logowanie':
                 return $this->logowanie();
@@ -29,11 +30,11 @@ class Kontroler
             case 'stronaGlowna':
                 return $this->stronaGlowna();
             case 'panelUzytkownika':
-                return $this->panelUzytkownika();
+                return $this->panelUzytkownika($dzien);
             case 'panelTrenera':
-                return $this->panelTrenera();
+                return $this->panelTrenera($dzien);
             case 'panelAdministratora':
-                return $this->panelAdministratora();
+                return $this->panelAdministratora($dzien);
             case 'usunWpisKalendarza':
                 $this->usunWpisKalendarza();
             case 'usunUzytkownika':
@@ -145,7 +146,7 @@ class Kontroler
         return $szablon;
     }
 
-    public function panelUzytkownika()
+    public function panelUzytkownika($dzien)
     {
         if (!$this->uzytkownik->zwrocUzytkownika()) {
             // Przekierowujemy na stronę logowania, bo nie znaleziono zalogowanego użytkownika
@@ -166,14 +167,14 @@ class Kontroler
             ];
         }
 
-        $parametry = array_merge($parametry, $kalendarz->przygotujParametrySzablonuUzytkownika());
+        $parametry = array_merge($parametry, $kalendarz->przygotujParametrySzablonuUzytkownika($dzien));
 
         $szablon = $this->szablon->zwrocSzablon($this->nazwa_strony, $parametry);
 
         return $szablon;
     }
 
-    public function panelTrenera()
+    public function panelTrenera($dzien)
     {
         if (!$this->uzytkownik->uzytkownikJestTrenerem()) {
             // Przekierowujemy na stronę logowania, bo nie znaleziono zalogowanego użytkownika albo uzytkownik nie jest trenerem
@@ -184,14 +185,14 @@ class Kontroler
         $kalendarz = new Kalendarz();
 
 
-        $parametry = $kalendarz->przygotujParametrySzablonuTrenera();
+        $parametry = $kalendarz->przygotujParametrySzablonuTrenera($dzien);
 
         $szablon = $this->szablon->zwrocSzablon($this->nazwa_strony, $parametry);
 
         return $szablon;
     }
 
-    public function panelAdministratora()
+    public function panelAdministratora($dzien)
     {
         if (!$this->uzytkownik->uzytkownikJestAdministratorem()) {
             // Przekierowujemy na stronę logowania, bo nie znaleziono zalogowanego użytkownika albo uzytkownik nie jest trenerem
@@ -277,6 +278,15 @@ class Kontroler
             // Przekierowujemy na stronę panelu użytkownika, bo znaleziono zalogowanego użytkownika
             header('Location: /?strona=panelUzytkownika');
             exit();
+        }
+    }
+
+    private function pobierzDzienZUrl()
+    {
+        if (!empty($_GET['dzien']) && in_array($_GET['dzien'], Kalendarz::DNI)) {
+            return $_GET['dzien'];
+        } else {
+            return Kalendarz::DNI[0];
         }
     }
 }
