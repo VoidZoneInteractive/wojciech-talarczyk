@@ -61,7 +61,7 @@ class BazaDanych
 
     public function pobierzKalendarzTrenera($idTrenera)
     {
-        $trescZapytania = 'SELECT uzytkownik, dzien, zapisany FROM kalendarz WHERE trener = ?';
+        $trescZapytania = 'SELECT uzytkownik, dzien, godzina, trening, zapisany FROM kalendarz WHERE trener = ?';
 
         $parametry = ['i', &$idTrenera];
 
@@ -134,6 +134,24 @@ class BazaDanych
         $trescZapytania = 'SELECT trening.nazwa, trening.id AS id_treningu, id_trenera, imie, nazwisko FROM trening_trener JOIN trening ON (trening_trener.trening = trening.id) JOIN uzytkownik ON (trening_trener.trener = uzytkownik.id_trenera) WHERE trening_trener.godzina = ?';
 
         $parametry = ['i', &$idGodziny];
+
+        return $this->wykonajZapytanieDoBazy($trescZapytania, $parametry, true, false);
+    }
+
+    public function pobierzTreningiTrenera($idGodziny, $idTrenera)
+    {
+        $trescZapytania = 'SELECT trening.nazwa, trening.id AS id_treningu FROM trening_trener JOIN trening ON (trening_trener.trening = trening.id) WHERE trening_trener.godzina = ? AND trening_trener.trener = ?';
+
+        $parametry = ['ii', &$idGodziny, &$idTrenera];
+
+        return $this->wykonajZapytanieDoBazy($trescZapytania, $parametry, true, false);
+    }
+
+    public function pobierzTreningiDlaTrenera($idTrenera)
+    {
+        $trescZapytania = 'SELECT trening.nazwa, trening.id AS id_treningu, id_trenera, CONCAT(imie, \' \', nazwisko) AS `uzytkownik` FROM kalendarz JOIN trening ON (kalendarz.trening = trening.id) JOIN uzytkownik ON (kalendarz.uzytkownik = uzytkownik.id) AND kalendarz.trener = ?';
+
+        $parametry = ['i', &$idTrenera];
 
         return $this->wykonajZapytanieDoBazy($trescZapytania, $parametry, true, false);
     }

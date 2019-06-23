@@ -8,30 +8,12 @@
     <meta name="author" content="Wojciech Talarczyk">
 
     <style type="text/css">
-        .kalendarz {
-            width: 90%;
-            margin: 20px 5%;
-            border: 1px dashed #999;
-
-            display: flex;
-            flex-direction: row;
-            flex-flow: row wrap;
+        .tabela-treningow {
+            width: 100%;
         }
 
-        .kalendarz-naglowek {
-            border: 1px dotted #990000;
-            width: 20%;
-            box-sizing: border-box;
-            padding: 5px;
-            flex: auto;
-        }
-
-        .kalendarz-zapis {
-            border: 1px dotted #009900;
-            width: 20%;
-            box-sizing: border-box;
-            padding: 5px;
-            flex: auto;
+        table tr td, table tr th {
+            border: 1px solid #999;
         }
     </style>
 
@@ -44,43 +26,32 @@
 <div><a href="/?strona=wylogowywanie">Wyloguj sie</a></div>
 
 <form name="kalendarz" method="post" action="">
-    <div class="kalendarz">
-        <div class="kalendarz-naglowek">
-            Poniedziałek
-        </div>
-        <div class="kalendarz-naglowek">
-            Wtorek
-        </div>
-        <div class="kalendarz-naglowek">
-            Środa
-        </div>
-        <div class="kalendarz-naglowek">
-            Czwartek
-        </div>
-        <div class="kalendarz-naglowek">
-            Piątek
-        </div>
-
-        <div class="kalendarz-zapis">
-            %{uzytkownicy-poniedzialek}
-        </div>
-
-        <div class="kalendarz-zapis">
-            %{uzytkownicy-wtorek}
-        </div>
-
-        <div class="kalendarz-zapis">
-            %{uzytkownicy-sroda}
-        </div>
-
-        <div class="kalendarz-zapis">
-            %{uzytkownicy-czwartek}
-        </div>
-
-        <div class="kalendarz-zapis">
-            %{uzytkownicy-piatek}
-        </div>
-    </div>
+    <table class="tabela-treningow">
+        <tr>
+            <th>
+                Godzina
+            </th>
+            <th>
+                Trening
+            </th>
+            <th>
+                Poniedziałek
+            </th>
+            <th>
+                Wtorek
+            </th>
+            <th>
+                Środa
+            </th>
+            <th>
+                Czwartek
+            </th>
+            <th>
+                Piątek
+            </th>
+        </tr>
+        %{wpisy}
+    </table>
 </form>
 </body>
 </html>
