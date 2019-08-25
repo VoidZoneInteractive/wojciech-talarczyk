@@ -176,13 +176,13 @@ class Kalendarz
 
         foreach (self::DNI as $dzien) {
             if ($dzien == $aktualny_dzien) {
-                $wynik[] = $dzien;
+                $wynik[] = sprintf('<li class="active"><a href="?strona=%s&dzien=%s">%s</a>', $strona, $dzien, $dzien);
             } else {
-                $wynik[] = sprintf('<a href="?strona=%s&dzien=%s">%s</a>', $strona, $dzien, $dzien);
+                $wynik[] = sprintf('<li><a href="?strona=%s&dzien=%s">%s</a></li>', $strona, $dzien, $dzien);
             }
         }
 
-        return implode(' | ', $wynik);
+        return implode('', $wynik);
     }
 
     private function przygotujWpisyTrenerowDlaUzytkownika($dzien, $daneKalendarza)
@@ -193,6 +193,7 @@ class Kalendarz
             $treningi = $this->bazaDanych->pobierzTreningiDlaGodziny($idGodziny);
 
             $rzadParametry = [
+                '%{id-godziny}' => $idGodziny,
                 '%{godzina}' => '<td rowspan="' . count($treningi) . '">' . $godzina . '</td>',
             ];
 
