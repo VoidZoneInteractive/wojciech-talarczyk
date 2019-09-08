@@ -42,8 +42,10 @@ class Kontroler
                 return $this->panelAdministratora($dzien);
             case 'usunWpisKalendarza':
                 $this->usunWpisKalendarza();
+                break;
             case 'usunUzytkownika':
                 $this->usunUzytkownika();
+                break;
         }
 
         throw new \Exception(sprintf('Nie znaleziono strony %s', $this->nazwa_strony));
