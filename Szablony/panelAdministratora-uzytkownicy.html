@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Siłownia - Logowanie</title>
+    <title>Siłownia</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="css/style.css">
@@ -32,20 +32,35 @@
                             <a class="navbar-brand" href="/"><img src="obrazy/logo.png" class="img-responsive" alt=""></a>
                         </div>
                     </div>
+                    <div class="collapse navbar-collapse" id="moje-menu">
+                        <ul class="nav navbar-nav navbar-right" id="ul_nawigacja">
+
+                            <li><a href="?strona=panelAdministratora">Kalendarz Treningów</a></li>
+                            <li><a href="?strona=panelAdministratora-uzytkownicy">Lista Użytkowników</a></li>
+                            <li><a href="?strona=panelAdministratora-trenerzy">Lista Trenerów</a></li>
+                            <li><a href="?strona=panelAdministratora-dietetyk">Zapisy do dietetyka</a></li>
+                            <li><a href="?strona=wylogowywanie">Wyloguj się</a></li>
+
+                        </ul>
+                    </div>
                 </div>
             </nav>
         </div>
     </div>
 </header>
 
-<div id="wiadomosc" style="%{styl_wiadomosci} margin-top: 150px;">%{wiadomosc}</div>
-
-<form name="formularz-logowania" action="" method="post">
-    <input type="text" class="form-control" name="login" placeholder="Adres E-mail"><br />
-    <input type="password" class="form-control" name="haslo" placeholder="Hasło"><br />
-    <button type="submit"  class="btn btn-success">Zaloguj się</button>
-    <p>Nie masz konta? <a href="?strona=rejestracja">Zarejestruj się</a></p>
-</form>
+<section style="margin: 120px auto;">
+    <div class="container">
+        <div class="row">
+            <div class="container">
+                <div class="row">
+                    <h4>Lista użytkowników</h4><br />
+                    %{lista-uzytkownikow}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 
 <div class="stopka">
     <div class="container-fluid">

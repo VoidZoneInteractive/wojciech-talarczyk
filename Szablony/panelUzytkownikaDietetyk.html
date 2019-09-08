@@ -63,13 +63,13 @@
             <div class="form-inline row">
                 <div class="form-group">
                     <label for="data" class="control-label">Wybierz termin:</label>
-                    <select style="width: 400px" id="data" name="data" class="form-control" onchange="document.getElementById('submit').removeAttribute('disabled')">
+                    <select id="data" name="data" class="form-control" onchange="document.getElementById('dietetyk-submit').removeAttribute('disabled')">
                         <option value="" disabled selected>Wybierz dzień...</option>
                         %{dni}
                     </select>
                 </div>
-                <div class="form-group">
-                    <button id="submit" type="submit" class="btn btn-success" disabled style="margin-left: 20px; float: right">
+                <div class="form-group" id="dietetyk-submit-container">
+                    <button id="dietetyk-submit" type="submit" class="btn btn-success" disabled>
                         Zapisz się na wybrany termin
                     </button>
                 </div>

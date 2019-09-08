@@ -162,6 +162,6 @@ class Uzytkownik
 
     private function szyfrujHaslo(string $haslo)
     {
-        return password_hash($haslo, PASSWORD_ARGON2I);
+        return password_hash($haslo, PASSWORD_BCRYPT);
     }
 }

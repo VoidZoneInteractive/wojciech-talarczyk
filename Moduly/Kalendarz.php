@@ -4,7 +4,7 @@ namespace Moduly;
 
 class Kalendarz
 {
-    const DNI = ['poniedziałek', 'wtorek', 'środa', 'czwartek', 'piątek'];
+    const DNI = ['poniedzialek', 'wtorek', 'sroda', 'czwartek', 'piatek'];
     const GODZINY = [
         1 => '08:00 - 09:30',
         2 => '10:00 - 11:30',
@@ -81,7 +81,7 @@ class Kalendarz
     public function przygotujParametrySzablonuUzytkownika($dzien)
     {
         $daneKalendarza = $this->bazaDanych->pobierzKalendarzUzytkownika($this->uzytkownik->zwrocUzytkownika()['id']);
-        $daneKalendarza = $this->przetworzKalendarzUzytkownika($daneKalendarza, $this->uzytkownik->zwrocUzytkownika()['id']);
+        $daneKalendarza = $this->przetworzKalendarzUzytkownika($daneKalendarza);
 
         $parametry = [];
         $parametry['%{wpisy}'] = $this->przygotujWpisyTrenerowDlaUzytkownika($dzien, $daneKalendarza);
@@ -119,15 +119,8 @@ class Kalendarz
         $daneKalendarzy = $this->bazaDanych->pobierzKalendarzeTrenerow();
         $daneKalendarzy = $this->przetworzKalendarze($daneKalendarzy);
 
-        $dietetykWpisy = $this->bazaDanych->pobierzDniDietetykaDlaAdministratora();
-
-
-
-        $wpisy = '';
 
         $parametry = [];
-
-        $parametry['%{dietetyk-wpisy}'] = implode('', $this->przygotujDietetykaDlaAdministratora($dietetykWpisy));
 
         $parametry['%{wpisy}'] = $this->przygotujWpisyTrenerowDlaAdministratora($dzien, $daneKalendarzy);
 
@@ -136,18 +129,21 @@ class Kalendarz
         return $parametry;
     }
 
-    private function przygotujDietetykaDlaAdministratora($dietetykWpisy)
+    public function przygotujDietetykaDlaAdministratora()
     {
+        $dietetykWpisy = $this->bazaDanych->pobierzDniDietetykaDlaAdministratora();
+
         if (empty($dietetykWpisy)) {
-            return ['Brak wpisow.'];
+            return ['%{dietetyk-wpisy}' => 'Brak wpisow.'];
         }
+
         $rezultat = [];
 
         foreach ($dietetykWpisy as $wpis) {
-            $rezultat[] = '<li>' . $wpis['data'] . ' - ' . $wpis['imie'] . ' ' . $wpis['nazwisko'] . '</li>';
+            $rezultat[] = '<tr><td>' . $wpis['imie'] . ' ' . $wpis['nazwisko'] . '</td><td>' . $wpis['data'] . '</td></tr>';
         }
 
-        return $rezultat;
+        return ['%{dietetyk-wpisy}' => '<table style="margin-top: 0" class="table table-striped table-bordered"><thead><tr><th>Użytkownik</th><th>Data zapisu</th></thead><tbody><tr>' . implode('', $rezultat) . '</tr></tbody></table>'];
     }
 
     public function przygotujListeUzytkownikow(array $uzytkownicy)
@@ -166,24 +162,24 @@ class Kalendarz
     public function przygotujListeUzytkownikowAdministratora(array $uzytkownicy)
     {
         foreach ($uzytkownicy as &$uzytkownik) {
-            $uzytkownik = $uzytkownik['dane'] . ' <a href=" /?strona=edycja&id_uzytkownika='.$uzytkownik['id'].'">edytuj</a> <a href=" /?strona=usunUzytkownika&id='.$uzytkownik['id'].'" onclick="if(!confirm(\'Czy napewno usunąć użytkownika: '.$uzytkownik['dane'].'?\')) { return false; }">usuń</a>';
+            $uzytkownik = '<tr><td>' . $uzytkownik['dane'] . '</td><td><a class="btn-warning btn-xs" href="/?strona=edycja&id_uzytkownika='.$uzytkownik['id'].'">edytuj</a> <a class="btn-danger btn-xs" href="/?strona=usunUzytkownika&id='.$uzytkownik['id'].'" onclick="if(!confirm(\'Czy napewno usunąć użytkownika: '.$uzytkownik['dane'].'?\')) { return false; }">usuń</a></td>';
         }
-        return '<ul><li>' . implode('</li><li>', $uzytkownicy) . '</li></ul>';
+        return '<table style="margin-top: 0" class="table table-striped table-bordered"><thead><tr><th>Użytkownik</th><th>Akcja</th></thead><tbody><tr>' . implode('', $uzytkownicy) . '</tr></tbody></table>';
     }
 
     public function przygotujListeTrenerowAdministratora(array $uzytkownicy)
     {
         foreach ($uzytkownicy as &$uzytkownik) {
-            $uzytkownik = $uzytkownik['dane'] . ' <a href=" /?strona=edycja&id_uzytkownika='.$uzytkownik['id'].'">edytuj</a> <a href=" /?strona=usunUzytkownika&id='.$uzytkownik['id'].'" onclick="if(!confirm(\'Czy napewno usunąć użytkownika: '.$uzytkownik['dane'].'?\')) { return false; }">usuń</a>';
+            $uzytkownik = '<tr><td>' . $uzytkownik['dane'] . '</td><td><a class="btn-warning btn-xs" href="/?strona=edycja&id_uzytkownika='.$uzytkownik['id'].'">edytuj</a> <a class="btn-danger btn-xs" href="/?strona=usunUzytkownika&id='.$uzytkownik['id'].'" onclick="if(!confirm(\'Czy napewno usunąć użytkownika: '.$uzytkownik['dane'].'?\')) { return false; }">usuń</a></td>';
         }
-        return '<ul><li>' . implode('</li><li>', $uzytkownicy) . '</li></ul>';
+        return '<table style="margin-top: 0" class="table table-striped table-bordered"><thead><tr><th>Użytkownik</th><th>Akcja</th></thead><tbody><tr>' . implode('', $uzytkownicy) . '</tr></tbody></table>';
     }
 
     public function usunWpisKalendarza($id) {
         $this->bazaDanych->usunWpisKalendarza($id);
     }
 
-    public function przetworzKalendarzUzytkownika(array $daneKalendarza, int $idUzytkownika)
+    public function przetworzKalendarzUzytkownika(array $daneKalendarza)
     {
         $rezultat = [];
 
@@ -192,7 +188,7 @@ class Kalendarz
                 $rezultat[$wpisKalendarza['trener']] = [];
             }
 
-            $rezultat[$wpisKalendarza['trener']][$wpisKalendarza['dzien']][$wpisKalendarza['godzina']][$wpisKalendarza['trening']] = $wpisKalendarza['uzytkownik'] == $idUzytkownika ? $wpisKalendarza['zapisany'] : 2;
+            $rezultat[$wpisKalendarza['trener']][$wpisKalendarza['dzien']][$wpisKalendarza['godzina']][$wpisKalendarza['trening']] = $wpisKalendarza['zapisany'];
         }
 
         return $rezultat;
@@ -327,12 +323,19 @@ class Kalendarz
             $licznik = 0;
 
             $zablokowaneTreningi = null;
+            $pelneTreningi = null;
 
             foreach ($treningi as $trening) {
                 $idTrenera = $trening['id_trenera'];
 
+                $ilosc_zapisow = $this->bazaDanych->pobierzIloscTreningowDlaDanegoPrzedzialu($dzien, $idGodziny, $trening['id_treningu'])['ilosc'];
+
                 if (isset($daneKalendarza[$idTrenera][$dzien][$idGodziny][$trening['id_treningu']]) && $daneKalendarza[$idTrenera][$dzien][$idGodziny][$trening['id_treningu']] == 1) {
                     $zablokowaneTreningi = serialize($trening);
+                }
+
+                if ($ilosc_zapisow >= $trening['trening_max']) {
+                    $pelneTreningi = serialize($trening);
                 }
             }
 
@@ -369,7 +372,7 @@ class Kalendarz
                             $parametryLinii['%{zablokowany}'] = 'disabled';
                             break;
                     }
-                } elseif (!empty($zablokowaneTreningi) && serialize($trening) !== $zablokowaneTreningi) {
+                } elseif ((!empty($zablokowaneTreningi) && serialize($trening) !== $zablokowaneTreningi) || (!empty($pelneTreningi) && serialize($trening) === $pelneTreningi)) {
                     $parametryLinii['%{przycisk}'] = 'Zablokowany';
                     $parametryLinii['%{zablokowany}'] = 'disabled';
                 }

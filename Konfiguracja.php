@@ -7,9 +7,9 @@ class Konfiguracja
     private static $konfiguracja = [
         \Moduly\BazaDanych::class => [
             'host' => 'localhost',
-            'uzytkownik' => 'root',
-            'haslo' => 'root',
-            'baza_danych' => 'wojtek_talarczyk',
+            'uzytkownik' => 'wtalar_feateam', // wtalar_feateam
+            'haslo' => '3~$4F^3bP1D&1f+', // 3~$4F^3bP1D&1f+
+            'baza_danych' => 'wtalar_feateam', // wtalar_feateam
         ],
     ];
 

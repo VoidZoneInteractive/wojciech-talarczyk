@@ -525,3 +525,18 @@ border-color: #33C4DC;
 .icon-twitter-circled:hover {
     color: #33C4DC; 
 }
+
+h4 {
+    text-align: center;
+    margin: 0 auto;
+}
+
+form[name='formularz-logowania'],
+form[name='formularz-rejestracji'],
+form[name='formularz-edycji'] {
+    margin: 150px 5px 100px 5px;
+}
+
+.btn.btn-success {
+    background-color: #33C4DC !important;
+}

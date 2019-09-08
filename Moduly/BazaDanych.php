@@ -69,11 +69,20 @@ class BazaDanych
 
     public function pobierzKalendarzUzytkownika($idUzytkownika)
     {
-        $trescZapytania = 'SELECT trener, dzien, godzina, trening, zapisany, uzytkownik FROM kalendarz';
+        $trescZapytania = 'SELECT trener, dzien, godzina, trening, zapisany FROM kalendarz WHERE uzytkownik = ?';
 
-        $parametry = null;
+        $parametry = ['i', &$idUzytkownika];
 
         return $this->wykonajZapytanieDoBazy($trescZapytania, $parametry, true, false);
+    }
+
+    public function pobierzIloscTreningowDlaDanegoPrzedzialu($dzien, $godzina, $trening)
+    {
+        $trescZapytania = 'SELECT COUNT(*) AS ilosc FROM kalendarz WHERE dzien = ? AND godzina = ? AND trening = ?';
+
+        $parametry = ['sii', &$dzien, &$godzina, &$trening];
+
+        return $this->wykonajZapytanieDoBazy($trescZapytania, $parametry, true, true);
     }
 
     public function pobierzKalendarzUzytkownikaDietetyk($idUzytkownika)
@@ -211,7 +220,7 @@ class BazaDanych
 
     public function pobierzTreningiDlaGodzinyOrazDnia($idGodziny, $dzien)
     {
-        $trescZapytania = 'SELECT trening.nazwa, trening.id AS id_treningu, id_trenera, imie, nazwisko FROM trening_trener JOIN trening ON (trening_trener.trening = trening.id) JOIN uzytkownik ON (trening_trener.trener = uzytkownik.id_trenera) WHERE trening_trener.godzina = ? AND trening_trener.dzien = ?';
+        $trescZapytania = 'SELECT trening.nazwa, trening.id AS id_treningu, id_trenera, imie, nazwisko, trening_max FROM trening_trener JOIN trening ON (trening_trener.trening = trening.id) JOIN uzytkownik ON (trening_trener.trener = uzytkownik.id_trenera) WHERE trening_trener.godzina = ? AND trening_trener.dzien = ?';
 
         $parametry = ['is', &$idGodziny, &$dzien];
 

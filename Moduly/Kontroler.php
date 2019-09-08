@@ -40,6 +40,12 @@ class Kontroler
                 return $this->panelTrenera($dzien);
             case 'panelAdministratora':
                 return $this->panelAdministratora($dzien);
+            case 'panelAdministratora-uzytkownicy':
+                return $this->panelAdministratora($dzien, 'uzytkownicy');
+            case 'panelAdministratora-trenerzy':
+                return $this->panelAdministratora($dzien, 'trenerzy');
+            case 'panelAdministratora-dietetyk':
+                return $this->panelAdministratora($dzien, 'dietetyk');
             case 'usunWpisKalendarza':
                 $this->usunWpisKalendarza();
                 break;
@@ -112,7 +118,7 @@ class Kontroler
 
     public function edycja($idUzytkownika)
     {
-        if (!$this->uzytkownik->uzytkownikJestAdministratorem()) {
+        if (!$this->uzytkownik->uzytkownikJestAdministratorem() && !$this->uzytkownik->zwrocUzytkownika()) {
             // Przekierowujemy na stronę logowania, bo nie znaleziono zalogowanego użytkownika albo uzytkownik nie jest adminem
             header('Location: /?strona=logowanie');
             exit();
@@ -293,7 +299,7 @@ class Kontroler
         return $szablon;
     }
 
-    public function panelAdministratora($dzien)
+    public function panelAdministratora($dzien, $modul = null)
     {
         if (!$this->uzytkownik->uzytkownikJestAdministratorem()) {
             // Przekierowujemy na stronę logowania, bo nie znaleziono zalogowanego użytkownika albo uzytkownik nie jest trenerem
@@ -303,24 +309,40 @@ class Kontroler
 
         $kalendarz = new Kalendarz();
 
-        $uzytkownicy = $this->uzytkownik->pobierzListeUzytkownikow();
+        $parametry = [];
 
-        $trenerzy = $this->uzytkownik->pobierzListeTrenerow();
+        if ($modul === 'uzytkownicy') {
+            $uzytkownicy = $this->uzytkownik->pobierzListeUzytkownikow();
 
-        foreach ($uzytkownicy as &$uzytkownik) {
-            $uzytkownik = ['dane' => sprintf('%s %s', $uzytkownik['imie'], $uzytkownik['nazwisko']), 'id' => $uzytkownik['id']];
+            foreach ($uzytkownicy as &$uzytkownik) {
+                $uzytkownik = ['dane' => sprintf('%s %s', $uzytkownik['imie'], $uzytkownik['nazwisko']),
+                               'id' => $uzytkownik['id']];
+            }
+
+            $parametry = [
+                '%{lista-uzytkownikow}' => $kalendarz->przygotujListeUzytkownikowAdministratora($uzytkownicy),
+            ];
         }
 
-        foreach ($trenerzy as &$trener) {
-            $trener = ['dane' => sprintf('%s %s', $trener['imie'], $trener['nazwisko']), 'id' => $trener['id']];
+        if ($modul === 'trenerzy') {
+            $trenerzy = $this->uzytkownik->pobierzListeTrenerow();
+
+            foreach ($trenerzy as &$trener) {
+                $trener = ['dane' => sprintf('%s %s', $trener['imie'], $trener['nazwisko']), 'id' => $trener['id']];
+            }
+
+            $parametry = [
+                '%{lista-trenerow}' => $kalendarz->przygotujListeTrenerowAdministratora($trenerzy),
+            ];
         }
 
-        $parametry = [
-            '%{lista-uzytkownikow}' => $kalendarz->przygotujListeUzytkownikowAdministratora($uzytkownicy),
-            '%{lista-trenerow}' => $kalendarz->przygotujListeTrenerowAdministratora($trenerzy),
-        ];
+        if ($modul === 'dietetyk') {
+            $parametry = $kalendarz->przygotujDietetykaDlaAdministratora();
+        }
 
-        $parametry = array_merge($parametry, $kalendarz->przygotujParametrySzablonuAdministratora($dzien));
+        if (is_null($modul)) {
+            $parametry = array_merge($parametry, $kalendarz->przygotujParametrySzablonuAdministratora($dzien));
+        }
 
         $szablon = $this->szablon->zwrocSzablon($this->nazwa_strony, $parametry);
 
@@ -403,6 +425,8 @@ class Kontroler
     {
         if (!empty($_GET['id_uzytkownika'])) {
             return $_GET['id_uzytkownika'];
+        } elseif ($uzytkownik = $this->uzytkownik->zwrocUzytkownika()) {
+            return $uzytkownik['id'];
         } else {
             return null;
         }
