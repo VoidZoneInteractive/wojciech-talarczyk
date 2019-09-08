@@ -32,6 +32,52 @@ class Kalendarz
         $this->szablon = new Szablon();
     }
 
+    public function pobierzKalendarzNaStroneGlowna()
+    {
+        $kalendarz = $this->bazaDanych->pobierzKalendarzNaStroneGlowna();
+
+        $dzien = null;
+
+        foreach ($kalendarz as $wpis) {
+
+            if ($dzien === null) {
+                $dzien = $wpis['dzien'];
+                $wpisy[$dzien] = ['<div class="tab-pane fade in active" id="' . $dzien . '">'];
+            }
+
+            if (empty($wpisy[$dzien])) {
+                $wpisy[$dzien] = [];
+            }
+
+            if ($dzien !== $wpis['dzien']) {
+                $wpisy[$dzien][] = '</div>';
+                $dzien = $wpis['dzien'];
+                $wpisy[$dzien] = ['<div class="tab-pane" id="' . $dzien . '">'];
+            }
+
+            $wpis['godzina'] = self::GODZINY[$wpis['godzina']];
+
+            $parametry = [
+                '%{godzina}' => $wpis['godzina'],
+                '%{dzien}' => $wpis['dzien'],
+                '%{trener}' => $wpis['trener'],
+                '%{nazwa}' => $wpis['nazwa'],
+                '%{opis}' => $wpis['opis'],
+                '%{obrazek}' => $wpis['obrazek'],
+                '%{identyfikator}' => $wpis['identyfikator'],
+            ];
+
+            $wpisy[$dzien][] = $this->szablon->zwrocSzablon('stronaGlowna-kalendarz', $parametry);
+
+        }
+
+        foreach ($wpisy as $dzien => &$wpisyNaDzien) {
+            $wpisyNaDzien = implode('', $wpisyNaDzien);
+        }
+
+        return implode('', $wpisy);
+    }
+
     public function przygotujParametrySzablonuUzytkownika($dzien)
     {
         $daneKalendarza = $this->bazaDanych->pobierzKalendarzUzytkownika($this->uzytkownik->zwrocUzytkownika()['id']);

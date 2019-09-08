@@ -56,7 +56,13 @@ class Kontroler
         // Jezeli uzytkownik jest zalogowany to pokieruj go od razu do odpowiedniego panelu
         $this->przekierujZalogowanegoUzytkownika();
 
-        $szablon = $this->szablon->zwrocSzablon($this->nazwa_strony);
+        $kalendarz = new Kalendarz();
+
+        $parametry = [
+            '%{wpisy}' => $kalendarz->pobierzKalendarzNaStroneGlowna()
+        ];
+
+        $szablon = $this->szablon->zwrocSzablon($this->nazwa_strony, $parametry);
 
         return $szablon;
     }

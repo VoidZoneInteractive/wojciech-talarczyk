@@ -245,6 +245,16 @@ class BazaDanych
         return $this->wykonajZapytanieDoBazy($trescZapytania, $parametry, true, false);
     }
 
+    public function pobierzKalendarzNaStroneGlowna()
+    {
+
+        $trescZapytania = 'SELECT tt.godzina, tt.dzien, CONCAT(u.imie, \' \', u.nazwisko) AS trener, t.nazwa, t.opis, CONCAT(tt.dzien, tt.godzina, t.id) AS identyfikator, u.obrazek FROM trening_trener tt JOIN uzytkownik u ON (tt.trener = u.id_trenera) JOIN trening t ON (tt.trening = t.id) ORDER BY FIELD(tt.dzien, \'poniedziałek\', \'wtorek\', \'środa\', \'czwartek\', \'piątek\') ASC, tt.godzina ASC;';
+
+        $parametry = null;
+
+        return $this->wykonajZapytanieDoBazy($trescZapytania, $parametry, true, false);
+    }
+
     private function wykonajZapytanieDoBazy(
         string $trescZapytania,
         ?array $parametry = null,
