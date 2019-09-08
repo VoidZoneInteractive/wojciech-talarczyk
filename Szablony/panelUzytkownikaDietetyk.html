@@ -35,7 +35,7 @@
                     <div class="collapse navbar-collapse" id="moje-menu">
                         <ul class="nav navbar-nav navbar-right" id="ul_nawigacja">
 
-                            <li><a href="?strona=panelUzytkownikaDietetyk">Zapisz się do dietetyka</a></li>
+                            <li><a href="?strona=panelUzytkownika">Zapisz się na trening</a></li>
                             <li><a href="?strona=wylogowywanie">Wyloguj się</a></li>
 
                         </ul>
@@ -53,40 +53,30 @@
     <div class="container">
         <div class="row">
             <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-                <h2><span class="czarny">Twój</span> <span class="niebieski"> grafik zajęć</span></h2>
+                <h2><span class="czarny">Zapisz</span> <span class="niebieski"> się do dietetyka</span></h2>
             </div>
         </div>
     </div>
-    <div class="container">
-        <center>
-            <div class="row">
-                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-                    <ul class="nav nav-pills">
+
+    <div class="tlo_grafik">
+        <div class="container" %{statusFormularza}>
+            <div class="form-inline row">
+                <div class="form-group">
+                    <label for="data" class="control-label">Wybierz termin:</label>
+                    <select style="width: 400px" id="data" name="data" class="form-control" onchange="document.getElementById('submit').removeAttribute('disabled')">
+                        <option value="" disabled selected>Wybierz dzień...</option>
                         %{dni}
-                    </ul>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <button id="submit" type="submit" class="btn btn-success" disabled style="margin-left: 20px; float: right">
+                        Zapisz się na wybrany termin
+                    </button>
                 </div>
             </div>
-        </center>
-
-        <div class="tlo_grafik">
-            <div class="kalendarz">
-                <table class="table table-striped table-bordered">
-                    <tr>
-                        <th>
-                            Godzina
-                        </th>
-                        <th>
-                            Trening
-                        </th>
-                        <th>
-                            Trener
-                        </th>
-                        <th>
-                            Zapis
-                        </th>
-                    </tr>
-                        %{wpisy}
-                </table>
+        </div>
+        <div class="kalendarz" style="text-align: center">
+            %{wpis}
         </div>
     </div>
 </section>

@@ -83,10 +83,22 @@
         </div>
 
         <div class="row">
-            Użytkownicy:<br />
-            %{lista-uzytkownikow}
-            <br />Trenerzy:<br />
-            %{lista-trenerow}
+            <div class="container col-lg-6">
+                <div class="row">
+                    <h4>Użytkownicy:</h4><br />
+                    %{lista-uzytkownikow}
+                    <br /><h4>Trenerzy:</h4><br />
+                    %{lista-trenerow}
+                </div>
+            </div>
+            <div class="container col-lg-6">
+                <div class="row">
+                    <h4>Zapisy do dietetyka:</h4><br />
+                    <ul>
+                    %{dietetyk-wpisy}
+                    </ul>
+                </div>
+            </div>
         </div>
     </div>
 </section>

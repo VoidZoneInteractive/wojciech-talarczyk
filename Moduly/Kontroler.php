@@ -34,6 +34,8 @@ class Kontroler
                 return $this->stronaGlowna();
             case 'panelUzytkownika':
                 return $this->panelUzytkownika($dzien);
+            case 'panelUzytkownikaDietetyk':
+                return $this->panelUzytkownikaDietetyk();
             case 'panelTrenera':
                 return $this->panelTrenera($dzien);
             case 'panelAdministratora':
@@ -222,6 +224,43 @@ class Kontroler
         }
 
         $parametry = array_merge($parametry, $kalendarz->przygotujParametrySzablonuUzytkownika($dzien));
+
+        $szablon = $this->szablon->zwrocSzablon($this->nazwa_strony, $parametry);
+
+        return $szablon;
+    }
+
+    public function panelUzytkownikaDietetyk()
+    {
+        if (!$this->uzytkownik->zwrocUzytkownika()) {
+            // Przekierowujemy na stronę logowania, bo nie znaleziono zalogowanego użytkownika
+            header('Location: /?strona=logowanie');
+            exit();
+        }
+
+        $parametry = [];
+
+        $kalendarz = new Kalendarz();
+
+        if ($_SERVER['REQUEST_METHOD'] == 'GET' && !empty($_GET['akcja']) && $_GET['akcja'] == 'usunRezerwacje') {
+            $kalendarz->usunRezerwacjeDietetyka();
+
+            // Przekieruj na stronę dietetyka
+            header('Location: /?strona=panelUzytkownikaDietetyk');
+            exit();
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $kalendarz->usunRezerwacjeDietetyka();
+            $kalendarz->zapiszDaneDietetyk($_POST['data']);
+
+            $parametry = [
+                '%{wiadomosc}' => 'Zapisano kalendarz',
+                '%{styl_wiadomosci}' => 'display: block;',
+            ];
+        }
+
+        $parametry = array_merge($parametry, $kalendarz->przygotujParametrySzablonuUzytkownikaDietetyk());
 
         $szablon = $this->szablon->zwrocSzablon($this->nazwa_strony, $parametry);
 

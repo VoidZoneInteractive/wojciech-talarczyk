@@ -69,9 +69,45 @@ class BazaDanych
 
     public function pobierzKalendarzUzytkownika($idUzytkownika)
     {
-        $trescZapytania = 'SELECT trener, dzien, godzina, trening, zapisany FROM kalendarz WHERE uzytkownik = ?';
+        $trescZapytania = 'SELECT trener, dzien, godzina, trening, zapisany, uzytkownik FROM kalendarz';
+
+        $parametry = null;
+
+        return $this->wykonajZapytanieDoBazy($trescZapytania, $parametry, true, false);
+    }
+
+    public function pobierzKalendarzUzytkownikaDietetyk($idUzytkownika)
+    {
+        $trescZapytania = 'SELECT data FROM dietetyk WHERE uzytkownik = ?';
 
         $parametry = ['i', &$idUzytkownika];
+
+        return $this->wykonajZapytanieDoBazy($trescZapytania, $parametry, true, false);
+    }
+
+    public function pobierzDniDietetyka($idUzytkownika)
+    {
+        $trescZapytania = 'SELECT data FROM dietetyk WHERE uzytkownik = ? AND data >= NOW()';
+
+        $parametry = ['i', &$idUzytkownika];
+
+        return $this->wykonajZapytanieDoBazy($trescZapytania, $parametry, true, false);
+    }
+
+    public function usunDniDietetyka($idUzytkownika)
+    {
+        $trescZapytania = 'DELETE FROM dietetyk WHERE uzytkownik = ?';
+
+        $parametry = ['i', &$idUzytkownika];
+
+        return $this->wykonajZapytanieDoBazy($trescZapytania, $parametry, false, false);
+    }
+
+    public function pobierzDniDietetykaDlaAdministratora()
+    {
+        $trescZapytania = 'SELECT d.data, u.imie, u.nazwisko FROM dietetyk d JOIN uzytkownik u ON (u.id = d.uzytkownik) WHERE d.data >= NOW() ORDER BY d.data ASC';
+
+        $parametry = null;
 
         return $this->wykonajZapytanieDoBazy($trescZapytania, $parametry, true, false);
     }
@@ -146,6 +182,24 @@ class BazaDanych
         return $this->wykonajZapytanieDoBazy($trescZapytania, $parametry);
     }
 
+    public function usunWpisyWypisanychUzytkownikow()
+    {
+        $trescZapytania = 'DELETE FROM kalendarz WHERE zapisany = 0';
+
+        $parametry = null;
+
+        return $this->wykonajZapytanieDoBazy($trescZapytania, $parametry);
+    }
+
+    public function dodajWpisDietetyka(string $data, int $idUzytkownika)
+    {
+        $trescZapytania = 'INSERT INTO dietetyk (data, uzytkownik) VALUES (?, ?)';
+
+        $parametry = ['si', &$data, &$idUzytkownika];
+
+        return $this->wykonajZapytanieDoBazy($trescZapytania, $parametry);
+    }
+
     public function pobierzTrenerowZTreningami()
     {
         $trescZapytania = 'SELECT DISTINCT id, imie, nazwisko, id_trenera FROM uzytkownik LEFT JOIN trening_trener ON (trening_trener.trener = uzytkownik.id_trenera) WHERE id_trenera IS NOT NULL AND administrator = 0 AND trening_trener.trening IS NOT NULL';
@@ -155,18 +209,18 @@ class BazaDanych
         return $this->wykonajZapytanieDoBazy($trescZapytania, $parametry, true, false);
     }
 
-    public function pobierzTreningiDlaGodziny($idGodziny)
+    public function pobierzTreningiDlaGodzinyOrazDnia($idGodziny, $dzien)
     {
-        $trescZapytania = 'SELECT trening.nazwa, trening.id AS id_treningu, id_trenera, imie, nazwisko FROM trening_trener JOIN trening ON (trening_trener.trening = trening.id) JOIN uzytkownik ON (trening_trener.trener = uzytkownik.id_trenera) WHERE trening_trener.godzina = ?';
+        $trescZapytania = 'SELECT trening.nazwa, trening.id AS id_treningu, id_trenera, imie, nazwisko FROM trening_trener JOIN trening ON (trening_trener.trening = trening.id) JOIN uzytkownik ON (trening_trener.trener = uzytkownik.id_trenera) WHERE trening_trener.godzina = ? AND trening_trener.dzien = ?';
 
-        $parametry = ['i', &$idGodziny];
+        $parametry = ['is', &$idGodziny, &$dzien];
 
         return $this->wykonajZapytanieDoBazy($trescZapytania, $parametry, true, false);
     }
 
     public function pobierzTreningiTrenera($idGodziny, $idTrenera)
     {
-        $trescZapytania = 'SELECT trening.nazwa, trening.id AS id_treningu FROM trening_trener JOIN trening ON (trening_trener.trening = trening.id) WHERE trening_trener.godzina = ? AND trening_trener.trener = ?';
+        $trescZapytania = 'SELECT trening.nazwa, trening_trener.dzien, trening.id AS id_treningu FROM trening_trener JOIN trening ON (trening_trener.trening = trening.id) WHERE trening_trener.godzina = ? AND trening_trener.trener = ?';
 
         $parametry = ['ii', &$idGodziny, &$idTrenera];
 
