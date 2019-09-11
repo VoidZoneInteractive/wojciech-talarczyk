@@ -301,7 +301,7 @@ class Kontroler
 
     public function panelAdministratora($dzien, $modul = null)
     {
-        if (!$this->uzytkownik->uzytkownikJestAdministratorem()) {
+        if (!$this->uzytkownik->uzytkownikJestAdministratorem() && (!$this->uzytkownik->uzytkownikJestDietetykiem() && $modul == 'dietetyk')) {
             // Przekierowujemy na stronę logowania, bo nie znaleziono zalogowanego użytkownika albo uzytkownik nie jest trenerem
             header('Location: /?strona=logowanie');
             exit();
@@ -338,6 +338,11 @@ class Kontroler
 
         if ($modul === 'dietetyk') {
             $parametry = $kalendarz->przygotujDietetykaDlaAdministratora();
+
+            if ($this->uzytkownik->uzytkownikJestDietetykiem()) {
+                $parametry['%{ukryj-start}'] = '<!--';
+                $parametry['%{ukryj-koniec}'] = '--!>';
+            }
         }
 
         if (is_null($modul)) {

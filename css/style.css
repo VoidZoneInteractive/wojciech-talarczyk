@@ -528,7 +528,7 @@ border-color: #33C4DC;
 
 h4 {
     text-align: center;
-    margin: 0 auto;
+    margin: 40px auto 40px auto;
 }
 
 form[name='formularz-logowania'],
@@ -539,4 +539,8 @@ form[name='formularz-edycji'] {
 
 .btn.btn-success {
     background-color: #33C4DC !important;
+}
+
+.stopka {
+    margin-top: 250px;
 }

@@ -46,6 +46,12 @@ class Uzytkownik
         return $uzytkownik && !empty($uzytkownik['administrator']);
     }
 
+    public function uzytkownikJestDietetykiem() {
+        $uzytkownik = $this->pobierzUzytkownikaZSesji();
+
+        return $uzytkownik && !empty($uzytkownik['dietetyk']);
+    }
+
     public function usunUzytkownika($id) {
         $this->bazaDanych->usunUzytkownika($id);
     }
@@ -69,6 +75,8 @@ class Uzytkownik
             // Przekieruj na panel administracyjny
             if (!empty($uzytkownik['administrator'])) {
                 header('Location: /?strona=panelAdministratora');
+            } elseif (!empty($uzytkownik['dietetyk'])) {
+                header('Location: /?strona=panelAdministratora-dietetyk');
             } elseif (!empty($uzytkownik['id_trenera'])) {
                 header('Location: /?strona=panelTrenera');
             } else {

@@ -55,9 +55,7 @@
 
 @media(max-width: 767px){
      #logo img{
-    
-    height: 25px;
-        
+        height: 25px;
     }
     
     .m1 img {
@@ -107,15 +105,6 @@
     }
     #uzytkownik_info{
         text-align: center
-    }
-}
-
-@media(min-width: 1024px) {
-    .stopka {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
     }
 }
 

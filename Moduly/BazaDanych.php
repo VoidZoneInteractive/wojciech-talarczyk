@@ -18,6 +18,7 @@ class BazaDanych
         try {
             if (self::$polaczenie === false) {
                 self::$polaczenie = new \mysqli($host, $uzytkownik, $haslo, $baza_danych);
+                self::$polaczenie->set_charset('utf8');
             }
         } catch (\Exception $e) {
             throw new \Exception('Nie można było połączyć się z bazą danych. Sprawdź konfigurację danych oraz serwera Mysql.');
@@ -42,7 +43,7 @@ class BazaDanych
 
     public function pobierzUzytkownika(string $login)
     {
-        $trescZapytania = 'SELECT id, imie, nazwisko, login, haslo, id_trenera, administrator FROM uzytkownik WHERE login = ?';
+        $trescZapytania = 'SELECT id, imie, nazwisko, login, haslo, id_trenera, administrator, dietetyk FROM uzytkownik WHERE login = ?';
 
         $parametry = ['s', &$login];
 
@@ -257,7 +258,7 @@ class BazaDanych
     public function pobierzKalendarzNaStroneGlowna()
     {
 
-        $trescZapytania = 'SELECT tt.godzina, tt.dzien, CONCAT(u.imie, \' \', u.nazwisko) AS trener, t.nazwa, t.opis, CONCAT(tt.dzien, tt.godzina, t.id) AS identyfikator, u.obrazek FROM trening_trener tt JOIN uzytkownik u ON (tt.trener = u.id_trenera) JOIN trening t ON (tt.trening = t.id) ORDER BY FIELD(tt.dzien, \'poniedziałek\', \'wtorek\', \'środa\', \'czwartek\', \'piątek\') ASC, tt.godzina ASC;';
+        $trescZapytania = 'SELECT tt.godzina, tt.dzien, CONCAT(u.imie, \' \', u.nazwisko) AS trener, t.nazwa, t.opis, CONCAT(tt.dzien, tt.godzina, t.id) AS identyfikator, u.obrazek FROM trening_trener tt JOIN uzytkownik u ON (tt.trener = u.id_trenera) JOIN trening t ON (tt.trening = t.id) ORDER BY FIELD(tt.dzien, \'poniedzialek\', \'wtorek\', \'sroda\', \'czwartek\', \'piatek\') ASC, tt.godzina ASC;';
 
         $parametry = null;
 
