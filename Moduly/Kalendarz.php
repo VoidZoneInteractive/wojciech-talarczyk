@@ -279,7 +279,7 @@ class Kalendarz
                 $data = new \DateTime('now +' . (string)$d . ' day');
             }
 
-            $daty[] = '<optgroup label="' . self::DNI[($d - 1) % 7] . ', ' . $data->format('d.m.Y') . '">';
+            $daty[] = '<optgroup label="' . self::DNI[($d) % 7] . ', ' . $data->format('d.m.Y') . '">';
 
             for ($g = 9; $g <= 17; $g++) {
                 $dataSformatowana = (string)$g . ':00:00';

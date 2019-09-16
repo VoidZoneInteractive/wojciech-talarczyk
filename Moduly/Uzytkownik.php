@@ -52,6 +52,12 @@ class Uzytkownik
         return $uzytkownik && !empty($uzytkownik['dietetyk']);
     }
 
+    public function uzytkownikJestPracownikiem() {
+        $uzytkownik = $this->pobierzUzytkownikaZSesji();
+
+        return $uzytkownik && !empty($uzytkownik['pracownik']);
+    }
+
     public function usunUzytkownika($id) {
         $this->bazaDanych->usunUzytkownika($id);
     }

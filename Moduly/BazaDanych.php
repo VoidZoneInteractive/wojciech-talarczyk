@@ -43,7 +43,7 @@ class BazaDanych
 
     public function pobierzUzytkownika(string $login)
     {
-        $trescZapytania = 'SELECT id, imie, nazwisko, login, haslo, id_trenera, administrator, dietetyk FROM uzytkownik WHERE login = ?';
+        $trescZapytania = 'SELECT id, imie, nazwisko, login, haslo, id_trenera, administrator, dietetyk, pracownik FROM uzytkownik WHERE login = ?';
 
         $parametry = ['s', &$login];
 

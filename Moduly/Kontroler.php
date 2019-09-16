@@ -152,8 +152,13 @@ class Kontroler
             $this->uzytkownik->aktualizujUzytkownika($idUzytkownika, $imie, $nazwisko, $login);
 
             // Przekierowujemy uzytkownika na strone z podziekowaniami za rejestracje
-            header('Location: /?strona=panelAdministratora');
-            exit();
+            if ($this->uzytkownik->uzytkownikJestAdministratorem()) {
+                header('Location: /?strona=panelAdministratora');
+                exit();
+            } else {
+                header('Location: /?strona=panelUzytkownika');
+                exit();
+            }
         } else {
             $uzytkownik = $this->uzytkownik->zwrocUzytkownikaPoId($idUzytkownika);
             $parametry = [
@@ -301,7 +306,7 @@ class Kontroler
 
     public function panelAdministratora($dzien, $modul = null)
     {
-        if (!$this->uzytkownik->uzytkownikJestAdministratorem() && (!$this->uzytkownik->uzytkownikJestDietetykiem() && $modul == 'dietetyk')) {
+        if (!$this->uzytkownik->uzytkownikJestAdministratorem() && (!$this->uzytkownik->uzytkownikJestDietetykiem() && $modul == 'dietetyk') && (!$this->uzytkownik->uzytkownikJestPracownikiem() && is_null($modul))) {
             // Przekierowujemy na stronę logowania, bo nie znaleziono zalogowanego użytkownika albo uzytkownik nie jest trenerem
             header('Location: /?strona=logowanie');
             exit();
@@ -347,6 +352,11 @@ class Kontroler
 
         if (is_null($modul)) {
             $parametry = array_merge($parametry, $kalendarz->przygotujParametrySzablonuAdministratora($dzien));
+
+            if ($this->uzytkownik->uzytkownikJestPracownikiem()) {
+                $parametry['%{ukryj-start}'] = '<!--';
+                $parametry['%{ukryj-koniec}'] = '--!>';
+            }
         }
 
         $szablon = $this->szablon->zwrocSzablon($this->nazwa_strony, $parametry);
