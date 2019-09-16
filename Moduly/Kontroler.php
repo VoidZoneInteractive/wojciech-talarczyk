@@ -306,7 +306,7 @@ class Kontroler
 
     public function panelAdministratora($dzien, $modul = null)
     {
-        if (!$this->uzytkownik->uzytkownikJestAdministratorem() && (!$this->uzytkownik->uzytkownikJestDietetykiem() && $modul == 'dietetyk') && (!$this->uzytkownik->uzytkownikJestPracownikiem() && is_null($modul))) {
+        if (!$this->uzytkownik->uzytkownikJestAdministratorem() && (!$this->uzytkownik->uzytkownikJestDietetykiem() && $modul == 'dietetyk') && (!$this->uzytkownik->uzytkownikJestPracownikiem() && (is_null($modul) || $modul == 'dietetyk'))) {
             // Przekierowujemy na stronę logowania, bo nie znaleziono zalogowanego użytkownika albo uzytkownik nie jest trenerem
             header('Location: /?strona=logowanie');
             exit();
@@ -346,6 +346,11 @@ class Kontroler
 
             if ($this->uzytkownik->uzytkownikJestDietetykiem()) {
                 $parametry['%{ukryj-start}'] = '<!--';
+                $parametry['%{ukryj-koniec}'] = '--!>';
+            }
+
+            if ($this->uzytkownik->uzytkownikJestPracownikiem()) {
+                $parametry['%{ukryj-start-pracownik}'] = '<!--';
                 $parametry['%{ukryj-koniec}'] = '--!>';
             }
         }
@@ -408,11 +413,12 @@ class Kontroler
 
     private function przekierujZalogowanegoUzytkownika()
     {
-        if ($this->uzytkownik->uzytkownikJestAdministratorem()) {
+        if ($this->uzytkownik->uzytkownikJestAdministratorem() || $this->uzytkownik->uzytkownikJestPracownikiem()) {
             // Przekierowujemy na stronę panelu administratora, bo znaleziono zalogowanego administratora
             header('Location: /?strona=panelAdministratora');
             exit();
         }
+
         if ($this->uzytkownik->uzytkownikJestTrenerem()) {
             // Przekierowujemy na stronę panelu trenera, bo znaleziono zalogowanego trenera
             header('Location: /?strona=panelTrenera');

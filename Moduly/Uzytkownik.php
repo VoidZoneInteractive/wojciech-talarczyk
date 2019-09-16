@@ -79,7 +79,7 @@ class Uzytkownik
         if (!empty($uzytkownik) && $this->porownajHasloIHasz($haslo, $uzytkownik['haslo'])) {
             $this->zapiszUzytkownikaWSesji($uzytkownik);
             // Przekieruj na panel administracyjny
-            if (!empty($uzytkownik['administrator'])) {
+            if (!empty($uzytkownik['administrator']) || !empty($uzytkownik['pracownik'])) {
                 header('Location: /?strona=panelAdministratora');
             } elseif (!empty($uzytkownik['dietetyk'])) {
                 header('Location: /?strona=panelAdministratora-dietetyk');
