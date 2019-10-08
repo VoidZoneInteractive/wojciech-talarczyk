@@ -2,6 +2,14 @@
 
 namespace Moduly;
 
+/**
+ * Class Kalendarz
+ *
+ * @package Moduly
+ *
+ * Ten moduł służy do zarządzania kalendarzem, czyli tworzenie kalendarza użytkownika i trenera
+ * oraz zarządzaniem zapisów na konkretne dni.
+ */
 class Kalendarz
 {
     const DNI = ['poniedzialek', 'wtorek', 'sroda', 'czwartek', 'piatek'];
@@ -21,6 +29,15 @@ class Kalendarz
     private $uzytkownik;
     private $szablon;
 
+    /**
+     * Kalendarz constructor.
+     *
+     * @throws \Exception
+     *
+     * Konstruktor klasy. Do jego zadań należy ustanowienie sesji (jeżeli ta jeszcze nie została zainicjowana),
+     * nawiązanie połączenia z bazą danych i zapisanie uchwytu do zmiennej $bazaDanych oraz inicjalizacja klasy
+     * Uzytkownik - ktora daje dostęp do funkcji zarządzania zalogowanym użytkownikiem.
+     */
     public function __construct()
     {
         if(session_status() == PHP_SESSION_NONE) {
@@ -101,6 +118,11 @@ class Kalendarz
         return $parametry;
     }
 
+    /**
+     * @return array
+     *
+     * Podobnie jak funkcja powyżej, lecz dla zalogowanego trenera
+     */
     public function przygotujParametrySzablonuTrenera()
     {
         $idTrenera = $this->uzytkownik->zwrocUzytkownika()['id_trenera'];
@@ -146,11 +168,23 @@ class Kalendarz
         return ['%{dietetyk-wpisy}' => '<table style="margin-top: 0" class="table table-striped table-bordered"><thead><tr><th>Użytkownik</th><th>Data zapisu</th></thead><tbody><tr>' . implode('', $rezultat) . '</tr></tbody></table>'];
     }
 
+    /**
+     * @param array $uzytkownicy
+     * @return string
+     *
+     * Funkcja przygotowuje listę użytkowników zapisanych dla konkretnego trenera
+     */
     public function przygotujListeUzytkownikow(array $uzytkownicy)
     {
         return '<ul><li>' . implode('</li><li>', $uzytkownicy) . '</li></ul>';
     }
 
+    /**
+     * Przygotowanie listy kalendarzy trenerów wraz z użytkownikami wyświetlanej w panelu administratora (gdzie można je usunąć)
+     *
+     * @param array $uzytkownicy
+     * @return string
+     */
     public function przygotujListeUzytkownikowKalendarzaAdministratora(array $uzytkownicy)
     {
         foreach ($uzytkownicy as &$uzytkownik) {
@@ -159,6 +193,11 @@ class Kalendarz
         return '<ul><li>' . implode('</li><li>', $uzytkownicy) . '</li></ul>';
     }
 
+    /**
+     * Przygotowanie listy użytkowników wyświetlanej w panelu administratora (gdzie można ich usunąć)
+     * @param array $uzytkownicy
+     * @return string
+     */
     public function przygotujListeUzytkownikowAdministratora(array $uzytkownicy)
     {
         foreach ($uzytkownicy as &$uzytkownik) {
@@ -175,10 +214,20 @@ class Kalendarz
         return '<table style="margin-top: 0" class="table table-striped table-bordered"><thead><tr><th>Użytkownik</th><th>Akcja</th></thead><tbody><tr>' . implode('', $uzytkownicy) . '</tr></tbody></table>';
     }
 
+    /**
+     * Wywołanie funkcji bazodanowej usuwającej wpis kalendarza w panelu administracyjnym.
+     * @param $id
+     */
     public function usunWpisKalendarza($id) {
         $this->bazaDanych->usunWpisKalendarza($id);
     }
 
+    /**
+     * @param array $daneKalendarza
+     * @return array
+     *
+     * Funkcja przygotowuje dane dla kalendarza użykownika które później są używane przy budowaniu zmiennych do szablonu
+     */
     public function przetworzKalendarzUzytkownika(array $daneKalendarza)
     {
         $rezultat = [];
@@ -226,6 +275,11 @@ class Kalendarz
         return $rezultat;
     }
 
+    /**
+     * Sformatowanie danych kalendarzy trenerów wykorzystywane w panelu administratora.
+     * @param array $daneKalendarzy
+     * @return array
+     */
     public function przetworzKalendarze(array $daneKalendarzy)
     {
         $rezultat = [];
@@ -245,11 +299,20 @@ class Kalendarz
         return $rezultat;
     }
 
+    /**
+     * Metoda wywołująca funkcję bazodanową usuwającą wpisy użytkownika.
+     * @param $id
+     */
     public function usunWpisyUzytkownika($id)
     {
         $this->bazaDanych->usunWpisyUzytkownika($id);
     }
 
+    /**
+     * @param array $dane
+     *
+     * Zapisuje kalendarz użytkownika/trenera
+     */
     public function zapiszDane(array $dane)
     {
         $dane = $this->przetworzDane($dane);
@@ -496,6 +559,12 @@ class Kalendarz
         return implode('', $rzedy);
     }
 
+    /**
+     * @param array $dane
+     * @return array
+     *
+     * Przetwarza dane pochodzące z bazy danych
+     */
     private function przetworzDane(array $dane)
     {
         $trener = key($dane);

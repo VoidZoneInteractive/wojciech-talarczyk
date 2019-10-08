@@ -2,12 +2,29 @@
 
 namespace Moduly;
 
+/**
+ * Class Kontroler
+ *
+ * @package Moduly
+ *
+ * Klasa Kontroler służy do przekazywania danych z bazy danych oraz z przeglądarki (takich jak adres url) do
+ * szablonów (w przypadku wyświetlania danych) i w drugą stronę (w przypadku zapisywania danych)
+ */
 class Kontroler
 {
     private $nazwa_strony = null;
     private $szablon = null;
     private $uzytkownik = null;
 
+    /**
+     * Kontroler constructor.
+     *
+     * @param null|string $nazwa_strony
+     *
+     * Kontruktor klasy - zapisuje nazwę strony (informacja co przychodzi z adresu przeglądarki) w zmiennej $nazwa_strony,
+     * przygotowuje klasę Szablon (do obsługi szablonów) i zapuje uchwyt w zmiennej $szablon oraz
+     * klasę użytkownika dającą dostęp do danych zalogowanego użytkownika i zapisuje uchwyt do $uzytkownik
+     */
     public function __construct(?string $nazwa_strony = null)
     {
         $this->nazwa_strony = $nazwa_strony;
@@ -15,6 +32,14 @@ class Kontroler
         $this->uzytkownik = new Uzytkownik();
     }
 
+    /**
+     * @return bool|mixed|null|string|string[]
+     * @throws \Exception
+     *
+     * Tutaj na podstawie przekazanej nazwy strony następuje wywołanie odpowiedniej funkcji która zajmie się
+     * przetwarzaniem danych przychodzących z przeglądarki (oraz później z bazy danych) lub w drugą stronę w przypadku zapisu
+     * Wyrzuca błąd w przypadku gdy nie poda się prawidłowej nazwy strony
+     */
     public function akcja()
     {
         $dzien = $this->pobierzDzienZUrl();
@@ -57,6 +82,11 @@ class Kontroler
         throw new \Exception(sprintf('Nie znaleziono strony %s', $this->nazwa_strony));
     }
 
+    /**
+     * @return bool|mixed|null|string|string[]
+     *
+     * Przekazuje dane do szablonu strony głównej
+     */
     public function stronaGlowna()
     {
         // Jezeli uzytkownik jest zalogowany to pokieruj go od razu do odpowiedniego panelu
@@ -73,6 +103,13 @@ class Kontroler
         return $szablon;
     }
 
+    /**
+     * @return bool|mixed|null|string|string[]
+     * @throws \Exception
+     *
+     * Przekazuje dane do szablonu rejestracja. Jeżeli przeglądarka wykonuje zapytanie typu POST wtedy uznajemy
+     * że przychodzą dane do zapisania i obsługujemy je odpowiednio i później przekierowujemy na stronę podziękowania
+     */
     public function rejestracja()
     {
         // Jezeli uzytkownik jest zalogowany to pokieruj go od razu do odpowiedniego panelu
@@ -207,6 +244,11 @@ class Kontroler
         }
     }
 
+    /**
+     * @return null
+     *
+     * Wylogowywanie się z serwisu
+     */
     public function wylogowywanie()
     {
         $this->uzytkownik->wylogujSie();
@@ -214,6 +256,11 @@ class Kontroler
         return null;
     }
 
+    /**
+     * @return bool|mixed|null|string|string[]
+     *
+     * Wyświetlamy stronę podziękowania za rejestrację.
+     */
     public function rejestracjaPodziekowanie()
     {
         $szablon = $this->szablon->zwrocSzablon($this->nazwa_strony);
@@ -286,6 +333,12 @@ class Kontroler
         return $szablon;
     }
 
+    /**
+     * @return bool|mixed|null|string|string[]
+     * @throws \Exception
+     *
+     * Jak wyżej, z tym, że strona dotyczy panelu trenera.
+     */
     public function panelTrenera()
     {
         if (!$this->uzytkownik->uzytkownikJestTrenerem()) {
@@ -369,6 +422,10 @@ class Kontroler
         return $szablon;
     }
 
+    /**
+     * Akcja usunięcia wpisu kalendarza dla konkretnego użytkownika/dnia/trenera.
+     * @throws \Exception
+     */
     public function usunWpisKalendarza()
     {
         if (!$this->uzytkownik->uzytkownikJestAdministratorem()) {
@@ -388,6 +445,10 @@ class Kontroler
         exit();
     }
 
+    /**
+     * Akcja usunięcia użytkownika z bazy danych wraz z jego wpisami kalendarza.
+     * @throws \Exception
+     */
     public function usunUzytkownika()
     {
         if (!$this->uzytkownik->uzytkownikJestAdministratorem()) {
@@ -411,6 +472,9 @@ class Kontroler
         exit();
     }
 
+    /**
+     * Po zalogowaniu sprawdzamy rodzaj użytkownika i przekierowujemy go do odpowiedniego panelu.
+     */
     private function przekierujZalogowanegoUzytkownika()
     {
         if ($this->uzytkownik->uzytkownikJestAdministratorem() || $this->uzytkownik->uzytkownikJestPracownikiem()) {

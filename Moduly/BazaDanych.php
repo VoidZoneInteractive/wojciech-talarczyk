@@ -2,10 +2,26 @@
 
 namespace Moduly;
 
+/**
+ * Class BazaDanych
+ *
+ * Ten moduł służy do połączenia się z bazą danych i pobierania oraz zapisywania tam danych o użytkowniku i treningach
+ *
+ * @package Moduly
+ */
 class BazaDanych
 {
     private static $polaczenie = false;
 
+    /**
+     * BazaDanych constructor.
+     *
+     * Konstruktor klasy - służy do nawiązania połączenia i zapisania tego połączenia w zmiennej $polaczenie
+     * To pozwala, żeby za każdym razem jak odwołujemy się do tej klasy nie nawiązywać nowego połączenia tylko
+     * wykorzystać to już istniejące
+     *
+     * @throws \Exception
+     */
     public function __construct()
     {
         $konfiguracja = (new \Konfiguracja(__CLASS__))->zwrocDaneKonfiguracyjne();
@@ -25,6 +41,14 @@ class BazaDanych
         }
     }
 
+    /**
+     * @param string $imie
+     * @param string $nazwisko
+     * @param string $login
+     * @param string $haslo
+     *
+     * Zapisanie danych użytkownika do bazy danych
+     */
     public function dodajUzytkownikaDoBazy(string $imie, string $nazwisko, string $login, string $haslo)
     {
         $trescZapytania = 'INSERT INTO uzytkownik (imie, nazwisko, login, haslo) VALUES (?, ?, ?, ?)';
@@ -41,6 +65,12 @@ class BazaDanych
         $this->wykonajZapytanieDoBazy($trescZapytania, $parametry);
     }
 
+    /**
+     * @param string $login
+     * @return array
+     *
+     * Pobranie danych użytkownika na podstawie jego loginu
+     */
     public function pobierzUzytkownika(string $login)
     {
         $trescZapytania = 'SELECT id, imie, nazwisko, login, haslo, id_trenera, administrator, dietetyk, pracownik FROM uzytkownik WHERE login = ?';
@@ -59,6 +89,12 @@ class BazaDanych
         return $this->wykonajZapytanieDoBazy($trescZapytania, $parametry, true);
     }
 
+    /**
+     * @param int $idUzytkownika
+     * @return array
+     *
+     * Pobranie imienia i nazwiska użytkownika na postawie unikalnego identyfikatora w bazie danych
+     */
     public function pobierzNazweUzytkownikaPoId(int $idUzytkownika)
     {
         $trescZapytania = 'SELECT imie, nazwisko FROM uzytkownik WHERE id = ?';
@@ -68,6 +104,12 @@ class BazaDanych
         return $this->wykonajZapytanieDoBazy($trescZapytania, $parametry, true);
     }
 
+    /**
+     * @param $idUzytkownika
+     * @return array
+     *
+     * Pobranie danych o kalendarzu uzytkownika na podstawie unikalnego identyfikatora uzytkownika
+     */
     public function pobierzKalendarzUzytkownika($idUzytkownika)
     {
         $trescZapytania = 'SELECT trener, dzien, godzina, trening, zapisany FROM kalendarz WHERE uzytkownik = ?';
@@ -122,6 +164,12 @@ class BazaDanych
         return $this->wykonajZapytanieDoBazy($trescZapytania, $parametry, true, false);
     }
 
+    /**
+     * @param $idTrenera
+     * @return array
+     *
+     * Pobranie danych o kalendarzu trenera na podstawie unikalnego identyfikatora trenera
+     */
     public function pobierzKalendarzTrenera($idTrenera)
     {
         $trescZapytania = 'SELECT uzytkownik, dzien, godzina, trening, zapisany FROM kalendarz WHERE trener = ?';
@@ -131,6 +179,10 @@ class BazaDanych
         return $this->wykonajZapytanieDoBazy($trescZapytania, $parametry, true, false);
     }
 
+    /**
+     * Pobranie kalendarzy dla trenera - do zapytania dowiązujemy jeszcze imię i nazwisko trenera).
+     * @return array
+     */
     public function pobierzKalendarzeTrenerow()
     {
         $trescZapytania = 'SELECT k.id, k.uzytkownik, k.dzien, k.godzina, k.trening, k.zapisany, u.imie, u.nazwisko FROM kalendarz k JOIN uzytkownik u ON (k.trener = u.id_trenera)';
@@ -156,6 +208,12 @@ class BazaDanych
         return $this->wykonajZapytanieDoBazy($trescZapytania, $parametry, true, false);
     }
 
+    /**
+     * Usunięcie użytkownika przy wykorzystaniu jego identyfikatora (id).
+     *
+     * @param $id
+     * @return array
+     */
     public function usunUzytkownika($id)
     {
         $trescZapytania = 'DELETE FROM uzytkownik WHERE id = ?';
@@ -165,6 +223,11 @@ class BazaDanych
         return $this->wykonajZapytanieDoBazy($trescZapytania, $parametry);
     }
 
+    /**
+     * Usunięcie wszystkich wpisów z kalendarza na podstawie id użytkwonika (używane przy usuwaniu użytkownika, żeby nie było problemów w bazie z niepowiązanymi danymi)
+     * @param $id
+     * @return array
+     */
     public function usunWpisyUzytkownika($id)
     {
         $trescZapytania = 'DELETE FROM kalendarz WHERE uzytkownik = ?';
@@ -174,6 +237,12 @@ class BazaDanych
         return $this->wykonajZapytanieDoBazy($trescZapytania, $parametry);
     }
 
+    /**
+     * Usunięcie wpisu z kalendarza na podstawie identyfikatora wpisu (id).
+     *
+     * @param $id
+     * @return array
+     */
     public function usunWpisKalendarza($id)
     {
         $trescZapytania = 'DELETE FROM kalendarz WHERE id = ?';
